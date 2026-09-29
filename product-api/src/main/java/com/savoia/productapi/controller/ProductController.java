@@ -3,6 +3,7 @@ package com.savoia.productapi.controller;
 import com.savoia.productapi.entity.Product;
 import com.savoia.productapi.enums.Category;
 import com.savoia.productapi.payload.request.ProductRequest;
+import com.savoia.productapi.payload.response.ResponseApi;
 import com.savoia.productapi.service.ProductService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -11,6 +12,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Sort;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,10 +23,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/products")
@@ -35,54 +34,63 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Product createProduct(@Valid @RequestBody ProductRequest productRequest){
-        return productService.createProduct(productRequest);
+    public ResponseEntity<?> createProduct(@Valid @RequestBody ProductRequest productRequest) {
+        Product product = productService.createProduct(productRequest);
+        return ResponseApi.buildResponse(
+                HttpStatus.CREATED,
+                product,
+                "Prodotto creato con successo");
     }
 
     @GetMapping
-    public List<Product> findAll() {
-        return productService.findAll();
+    public ResponseEntity<?> findAll() {
+        return ResponseApi.buildResponse(HttpStatus.OK, productService.findAll());
     }
 
     @GetMapping("/{id}")
-    public Product findById(
+    public ResponseEntity<?> findById(
             @PathVariable("id") @Positive(message = "L'id deve essere positivo") Long id) {
-        return productService.findById(id);
+        return ResponseApi.buildResponse(HttpStatus.OK, productService.findById(id));
     }
 
     @PutMapping("/{id}")
-    public Product updateProduct(
+    public ResponseEntity<?> updateProduct(
             @PathVariable("id") @Positive(message = "L'id deve essere positivo") Long id,
             @Valid @RequestBody ProductRequest productRequest) {
-        return productService.updateProduct(id, productRequest);
+        Product product = productService.updateProduct(id, productRequest);
+        return ResponseApi.buildResponse(
+                HttpStatus.OK,
+                product,
+                "Prodotto aggiornato con successo");
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteProduct(
+    public ResponseEntity<?> deleteProduct(
             @PathVariable("id") @Positive(message = "L'id deve essere positivo") Long id) {
         productService.deleteProduct(id);
+        return ResponseApi.buildResponse(
+                HttpStatus.NO_CONTENT,
+                "Prodotto eliminato con successo");
     }
 
     @GetMapping("/category/{category}")
-    public List<Product> findByCategory(
+    public ResponseEntity<?> findByCategory(
             @PathVariable("category") @NotNull(message = "La categoria è obbligatoria") Category category) {
-        return productService.findByCategory(category);
+        return ResponseApi.buildResponse(HttpStatus.OK, productService.findByCategory(category));
     }
 
     @GetMapping("/search")
-    public List<Product> searchByName(
+    public ResponseEntity<?> searchByName(
             @RequestParam("name")
             @NotBlank(message = "Il nome è obbligatorio")
             @Size(max = 200, message = "Il nome non può superare i 200 caratteri") String name) {
-        return productService.searchByName(name);
+        return ResponseApi.buildResponse(HttpStatus.OK, productService.searchByName(name));
     }
 
     @GetMapping("/sort")
-    public List<Product> sortByPrice(
+    public ResponseEntity<?> sortByPrice(
             @RequestParam(name = "direction", defaultValue = "ASC")
             @NotNull(message = "La direzione è obbligatoria") Sort.Direction direction) {
-        return productService.sortByPrice(direction);
+        return ResponseApi.buildResponse(HttpStatus.OK, productService.sortByPrice(direction));
     }
 }
