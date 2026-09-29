@@ -22,6 +22,9 @@ public class StringUtility {
         return string.toUpperCase().trim();
     }
 
+    public static String formatText(String text) {
+        return StringUtility.capitalizeFirstLetter(StringUtility.cleanString(text));
+    }
 
     public static String capitalizeFirstLetter(String str) {
         if (str == null || str.isEmpty()) {

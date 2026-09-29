@@ -63,11 +63,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Product> searchByName(String name) {
-        return productRepository
-                .findAll()
-                .stream()
-                .filter(p -> p.getName().equalsIgnoreCase(name))
-                .toList();
+        return productRepository.findAllByNameLike(name);
     }
 
     @Override

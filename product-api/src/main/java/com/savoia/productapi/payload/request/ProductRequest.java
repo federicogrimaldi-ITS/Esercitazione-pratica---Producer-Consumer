@@ -24,35 +24,32 @@ import java.math.BigDecimal;
 @Builder
 public class ProductRequest {
 
-    @NotBlank(message = "Il nome è obbligatorio")
-    @Size(max = 200, message = "Il nome non può superare i 200 caratteri")
+    @NotBlank(message = "Name is required")
+    @Size(max = 200, message = "Name cannot exceed 200 characters")
     private String name;
 
     private String description;
 
-    @NotNull(message = "Il prezzo è obbligatorio")
-    @DecimalMin(value = "0.0", inclusive = true, message = "Il prezzo non può essere negativo")
-    @Digits(integer = 8, fraction = 2, message = "Il prezzo deve avere al massimo 8 cifre intere e 2 decimali")
+    @NotNull(message = "Price is required")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Price cannot be negative")
+    @Digits(integer = 8, fraction = 2, message = "Price must have at most 8 integer digits and 2 decimal places")
     private BigDecimal price;
 
-    @NotNull(message = "La categoria è obbligatoria")
+    @NotNull(message = "Category is required")
     private Category category;
 
     @Builder.Default
-    @Min(value = 0, message = "La quantità non può essere negativa")
+    @Min(value = 0, message = "Quantity cannot be negative")
     private Integer quantity = 0;
 
     public static Product mapToEntity(ProductRequest productRequest){
         return Product.builder()
-                .name(formatText(productRequest.getName()))
-                .description(formatText(productRequest.getDescription()))
+                .name(StringUtility.formatText(productRequest.getName()))
+                .description(StringUtility.formatText(productRequest.getDescription()))
                 .price(productRequest.getPrice())
                 .category(productRequest.getCategory())
                 .quantity(productRequest.getQuantity() == null ? 0 : productRequest.getQuantity())
                 .build();
     }
 
-    private static String formatText(String text) {
-        return StringUtility.capitalizeFirstLetter(StringUtility.cleanString(text));
-    }
 }

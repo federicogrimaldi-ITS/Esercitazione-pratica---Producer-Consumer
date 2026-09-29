@@ -48,5 +48,5 @@ public class Product {
     @CreationTimestamp
     @Builder.Default
     @Column(name = "data_creazione", nullable = false, updatable = false)
-    private LocalDateTime dataCreazione = LocalDateTime.now();
+    private LocalDateTime creationDate = LocalDateTime.now();
 }

@@ -1,5 +1,6 @@
 package com.savoia.productapi.payload.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ public class ResponseApi<T> {
     private HttpStatus httpStatus;
     private String error;
     private String message;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Map<String, String> errors;
     private T data;
 

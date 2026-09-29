@@ -39,7 +39,7 @@ public class ProductController {
         return ResponseApi.buildResponse(
                 HttpStatus.CREATED,
                 product,
-                "Prodotto creato con successo");
+                "Product created successfully");
     }
 
     @GetMapping
@@ -49,48 +49,48 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> findById(
-            @PathVariable("id") @Positive(message = "L'id deve essere positivo") Long id) {
+            @PathVariable("id") @Positive(message = "The ID must be positive") Long id) {
         return ResponseApi.buildResponse(HttpStatus.OK, productService.findById(id));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateProduct(
-            @PathVariable("id") @Positive(message = "L'id deve essere positivo") Long id,
+            @PathVariable("id") @Positive(message = "The ID must be positive") Long id,
             @Valid @RequestBody ProductRequest productRequest) {
         Product product = productService.updateProduct(id, productRequest);
         return ResponseApi.buildResponse(
                 HttpStatus.OK,
                 product,
-                "Prodotto aggiornato con successo");
+                "Product updated successfully");
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteProduct(
-            @PathVariable("id") @Positive(message = "L'id deve essere positivo") Long id) {
+            @PathVariable("id") @Positive(message = "The ID must be positive") Long id) {
         productService.deleteProduct(id);
         return ResponseApi.buildResponse(
                 HttpStatus.NO_CONTENT,
-                "Prodotto eliminato con successo");
+                "Product deleted successfully");
     }
 
     @GetMapping("/category/{category}")
     public ResponseEntity<?> findByCategory(
-            @PathVariable("category") @NotNull(message = "La categoria è obbligatoria") Category category) {
+            @PathVariable("category") @NotNull(message = "Category is required") Category category) {
         return ResponseApi.buildResponse(HttpStatus.OK, productService.findByCategory(category));
     }
 
     @GetMapping("/search")
     public ResponseEntity<?> searchByName(
             @RequestParam("name")
-            @NotBlank(message = "Il nome è obbligatorio")
-            @Size(max = 200, message = "Il nome non può superare i 200 caratteri") String name) {
+            @NotBlank(message = "Name is required")
+            @Size(max = 200, message = "Name cannot exceed 200 characters") String name) {
         return ResponseApi.buildResponse(HttpStatus.OK, productService.searchByName(name));
     }
 
     @GetMapping("/sort")
     public ResponseEntity<?> sortByPrice(
             @RequestParam(name = "direction", defaultValue = "ASC")
-            @NotNull(message = "La direzione è obbligatoria") Sort.Direction direction) {
+            @NotNull(message = "Direction is required") Sort.Direction direction) {
         return ResponseApi.buildResponse(HttpStatus.OK, productService.sortByPrice(direction));
     }
 }

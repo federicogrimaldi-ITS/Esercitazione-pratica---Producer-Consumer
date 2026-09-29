@@ -95,7 +95,7 @@ public class ExceptionManagement {
                 .timestamp(LocalDateTime.now())
                 .httpStatus(status)
                 .error(status.getReasonPhrase())
-                .message("Alcuni campi non sono validi.")
+                .message("Some fields are invalid.")
                 .errors(errors)
                 .build();
         return new ResponseEntity<>(response, status);
@@ -153,7 +153,7 @@ public class ExceptionManagement {
                 .stream()
                 .collect(Collectors.toMap(
                         org.springframework.validation.FieldError::getField,
-                        e -> e.getDefaultMessage() == null ? "valore non valido" : e.getDefaultMessage(),
+                        e -> e.getDefaultMessage() == null ? "Invalid value" : e.getDefaultMessage(),
                         (first, second) -> first,
                         LinkedHashMap::new));
 
@@ -163,7 +163,7 @@ public class ExceptionManagement {
                 .timestamp(LocalDateTime.now())
                 .httpStatus(status)
                 .error(status.getReasonPhrase())
-                .message("Alcuni campi non sono validi.")
+                .message("Some fields are invalid.")
                 .errors(errors)
                 .build();
         return new ResponseEntity<>(response, status);
