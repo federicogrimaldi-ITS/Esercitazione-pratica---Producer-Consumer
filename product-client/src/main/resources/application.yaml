@@ -1,6 +1,11 @@
 spring:
   application:
     name: product-client
+  http:
+    clients:
+      # Timeout delle chiamate HTTP verso la Producer
+      connect-timeout: 2s
+      read-timeout: 5s
 
 server:
   port: 8082
