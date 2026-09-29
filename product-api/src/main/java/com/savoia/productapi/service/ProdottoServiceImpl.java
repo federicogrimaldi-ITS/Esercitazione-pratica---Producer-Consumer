@@ -2,6 +2,8 @@ package com.savoia.productapi.service;
 
 import com.savoia.productapi.entity.Prodotto;
 import com.savoia.productapi.enums.Categoria;
+import com.savoia.productapi.payload.request.ProdottoRequest;
+import com.savoia.productapi.repository.ProdottoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -12,11 +14,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProdottoServiceImpl implements ProdottoService{
 
-    private final ProdottoServiceImpl prodottoService;
+    private final ProdottoRepository prodottoRepository;
 
     @Override
-    public Prodotto creaProdotto(Prodotto prodotto) {
-        return null;
+    public Prodotto createProduct(ProdottoRequest request) {
+        return prodottoRepository.save(ProdottoRequest.mapToEntity(request));
     }
 
     @Override

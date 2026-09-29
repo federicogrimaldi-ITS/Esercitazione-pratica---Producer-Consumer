@@ -2,14 +2,14 @@ package com.savoia.productapi.service;
 
 import com.savoia.productapi.entity.Prodotto;
 import com.savoia.productapi.enums.Categoria;
-import com.savoia.productapi.response.ResponseApi;
+import com.savoia.productapi.payload.request.ProdottoRequest;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
 public interface ProdottoService {
 
-    Prodotto creaProdotto(Prodotto prodotto);
+    Prodotto createProduct(ProdottoRequest prodotto);
 
     List<Prodotto> trovaTutti();
 

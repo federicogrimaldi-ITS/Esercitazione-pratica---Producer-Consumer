@@ -1,6 +1,6 @@
 package com.savoia.productapi.exception;
 
-import com.savoia.productapi.response.ResponseApi;
+import com.savoia.productapi.payload.response.ResponseApi;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
