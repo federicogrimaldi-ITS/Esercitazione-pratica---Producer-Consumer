@@ -5,6 +5,7 @@ import com.savoia.productapi.enums.Category;
 import com.savoia.productapi.payload.request.ProductRequest;
 import com.savoia.productapi.payload.response.ResponseApi;
 import com.savoia.productapi.service.ProductService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -34,6 +35,7 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
+    @SecurityRequirement(name = "basicAuth")
     public ResponseEntity<?> createProduct(@Valid @RequestBody ProductRequest productRequest) {
         Product product = productService.createProduct(productRequest);
         return ResponseApi.buildResponse(
@@ -54,6 +56,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
+    @SecurityRequirement(name = "basicAuth")
     public ResponseEntity<?> updateProduct(
             @PathVariable("id") @Positive(message = "The ID must be positive") Long id,
             @Valid @RequestBody ProductRequest productRequest) {
@@ -65,6 +68,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
+    @SecurityRequirement(name = "basicAuth")
     public ResponseEntity<?> deleteProduct(
             @PathVariable("id") @Positive(message = "The ID must be positive") Long id) {
         productService.deleteProduct(id);

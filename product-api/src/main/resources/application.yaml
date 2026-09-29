@@ -28,6 +28,12 @@ spring:
   main:
     banner-mode: off
 
+  security:
+    user:
+      name: ${API_USERNAME}
+      password: ${API_PASSWORD}
+      roles: USER
+
 spring-doc:
   swagger-ui:
     enabled: true

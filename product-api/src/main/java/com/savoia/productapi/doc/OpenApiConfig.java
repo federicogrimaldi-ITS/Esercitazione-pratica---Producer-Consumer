@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,11 +12,10 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 @SecurityScheme(
-        name = "bearerAuth",
-        description = "JWT user",
-        scheme = "bearer",
+        name = "basicAuth",
+        description = "HTTP Basic authentication",
+        scheme = "basic",
         type = SecuritySchemeType.HTTP,
-        bearerFormat = "JWT",
         in = SecuritySchemeIn.HEADER
 )
 @Configuration
@@ -30,9 +28,6 @@ public class OpenApiConfig {
         serverDev.setUrl("http://localhost:8080/api");
         serverDev.setDescription("Development");
 
-        SecurityRequirement security = new SecurityRequirement();
-        security.addList("bearerAuth");
-
         Info info = new Info()
                 .title("Management System API")
                 .version("0.1")
@@ -40,7 +35,6 @@ public class OpenApiConfig {
 
         return new OpenAPI()
                 .info(info)
-                .servers(List.of(serverDev))
-                .security(List.of(security));
+                .servers(List.of(serverDev));
     }
 }
