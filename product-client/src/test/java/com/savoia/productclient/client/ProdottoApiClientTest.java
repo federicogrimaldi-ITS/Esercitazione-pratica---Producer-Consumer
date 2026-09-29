@@ -35,17 +35,25 @@ import static org.springframework.http.HttpMethod.GET;
 @TestPropertySource(properties = "api.base-url=http://producer.test/api")
 class ProdottoApiClientTest {
 
+    /** Prodotto come lo serializza la Producer (entity Prodotto, campi in inglese, categoria enum). */
     static final String PRODOTTO_JSON = """
             {
                 "id": 1,
-                "nome": "Laptop Pro 15",
-                "descrizione": "Notebook professionale",
-                "prezzo": 1299.90,
-                "categoria": "Informatica",
-                "quantita": 15,
+                "name": "Laptop Pro 15",
+                "description": "Notebook professionale",
+                "price": 1299.90,
+                "category": "INFORMATICA",
+                "quantity": 15,
                 "dataCreazione": "2026-09-01T09:00:00"
             }
             """;
+
+    /** Busta ResponseApi con cui la Producer avvolge ogni risposta corretta. */
+    static String risposta(String data) {
+        return """
+                {"data": %s, "error": null, "errors": null, "httpStatus": "200 OK", "message": null, "timestamp": "2026-09-29T10:00:00.123456789"}
+                """.formatted(data);
+    }
 
     @TestConfiguration
     @EnableConfigurationProperties(ApiProperties.class)
@@ -60,9 +68,9 @@ class ProdottoApiClientTest {
 
     @Test
     void trovaTuttiSenzaFiltriChiamaLaListaCompleta() {
-        server.expect(requestTo("http://producer.test/api/prodotti"))
+        server.expect(requestTo("http://producer.test/api/products"))
                 .andExpect(method(GET))
-                .andRespond(withSuccess("[" + PRODOTTO_JSON + "]", MediaType.APPLICATION_JSON));
+                .andRespond(withSuccess(risposta("[" + PRODOTTO_JSON + "]"), MediaType.APPLICATION_JSON));
 
         List<ProdottoDTO> prodotti = client.trovaTutti(CriteriRicerca.nessuno());
 
@@ -72,8 +80,8 @@ class ProdottoApiClientTest {
 
     @Test
     void trovaTuttiInoltraNomeECategoriaComeQueryParam() {
-        server.expect(requestTo("http://producer.test/api/prodotti?nome=laptop&categoria=Informatica"))
-                .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
+        server.expect(requestTo("http://producer.test/api/products?nome=laptop&categoria=INFORMATICA"))
+                .andRespond(withSuccess(risposta("[]"), MediaType.APPLICATION_JSON));
 
         List<ProdottoDTO> prodotti = client.trovaTutti(new CriteriRicerca("laptop", "Informatica"));
 
@@ -83,8 +91,8 @@ class ProdottoApiClientTest {
 
     @Test
     void trovaPerIdConverteIlJsonNelDto() {
-        server.expect(requestTo("http://producer.test/api/prodotti/1"))
-                .andRespond(withSuccess(PRODOTTO_JSON, MediaType.APPLICATION_JSON));
+        server.expect(requestTo("http://producer.test/api/products/1"))
+                .andRespond(withSuccess(risposta(PRODOTTO_JSON), MediaType.APPLICATION_JSON));
 
         ProdottoDTO prodotto = client.trovaPerId(1L);
 
@@ -93,28 +101,33 @@ class ProdottoApiClientTest {
                 "Laptop Pro 15",
                 "Notebook professionale",
                 new BigDecimal("1299.90"),
-                "Informatica",
+                "INFORMATICA",
                 15,
                 LocalDateTime.of(2026, 9, 1, 9, 0)));
     }
 
     @Test
     void prodottoInesistenteProduceProdottoNonTrovatoConIlMessaggioDellApi() {
-        server.expect(requestTo("http://producer.test/api/prodotti/9999"))
+        server.expect(requestTo("http://producer.test/api/products/9999"))
                 .andRespond(withStatus(HttpStatus.NOT_FOUND)
                         .contentType(MediaType.APPLICATION_JSON)
                         .body("""
-                                {"status": 404, "message": "Prodotto non trovato", "timestamp": "2026-09-28T18:30:00"}
+                                {
+                                    "timestamp": "2026-09-28T18:30:00",
+                                    "httpStatus": "404 NOT_FOUND",
+                                    "error": "Not Found",
+                                    "message": "Prodotto non trovato con id: 9999"
+                                }
                                 """));
 
         assertThatThrownBy(() -> client.trovaPerId(9999L))
                 .isInstanceOf(ProdottoNonTrovatoException.class)
-                .hasMessage("Prodotto non trovato");
+                .hasMessage("Prodotto non trovato con id: 9999");
     }
 
     @Test
     void erroreDelServerProduceApiErroreConLoStatus() {
-        server.expect(requestTo("http://producer.test/api/prodotti"))
+        server.expect(requestTo("http://producer.test/api/products"))
                 .andRespond(withServerError());
 
         assertThatThrownBy(() -> client.trovaTutti(CriteriRicerca.nessuno()))
@@ -124,7 +137,7 @@ class ProdottoApiClientTest {
 
     @Test
     void producerNonRaggiungibileProduceApiNonDisponibile() {
-        server.expect(requestTo("http://producer.test/api/prodotti"))
+        server.expect(requestTo("http://producer.test/api/products"))
                 .andRespond(withException(new IOException("Connection refused")));
 
         assertThatThrownBy(() -> client.trovaTutti(CriteriRicerca.nessuno()))

@@ -5,9 +5,9 @@ import com.savoia.productclient.config.CacheConfig;
 import com.savoia.productclient.exception.ApiErroreException;
 import com.savoia.productclient.exception.ApiNonDisponibileException;
 import com.savoia.productclient.exception.ProdottoNonTrovatoException;
-import com.savoia.productclient.model.ApiErrorDTO;
 import com.savoia.productclient.model.CriteriRicerca;
 import com.savoia.productclient.model.ProdottoDTO;
+import com.savoia.productclient.model.RispostaApi;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
@@ -29,7 +29,11 @@ import java.util.function.Supplier;
 @Component
 public class ProdottoApiClient {
 
-    private static final ParameterizedTypeReference<List<ProdottoDTO>> LISTA_PRODOTTI =
+    private static final ParameterizedTypeReference<RispostaApi<List<ProdottoDTO>>> LISTA_PRODOTTI =
+            new ParameterizedTypeReference<>() {
+            };
+
+    private static final ParameterizedTypeReference<RispostaApi<ProdottoDTO>> PRODOTTO =
             new ParameterizedTypeReference<>() {
             };
 
@@ -41,21 +45,25 @@ public class ProdottoApiClient {
 
     @Cacheable(CacheConfig.CACHE_PRODOTTI)
     public List<ProdottoDTO> trovaTutti(CriteriRicerca criteri) {
-        return esegui(() -> restClient.get()
-                .uri(uri -> uri.path("/prodotti")
+        return dati(esegui(() -> restClient.get()
+                .uri(uri -> uri.path("/products")
                         .queryParamIfPresent("nome", Optional.ofNullable(criteri.nome()))
                         .queryParamIfPresent("categoria", Optional.ofNullable(criteri.categoria()))
                         .build())
                 .retrieve()
-                .body(LISTA_PRODOTTI));
+                .body(LISTA_PRODOTTI)));
     }
 
     @Cacheable(CacheConfig.CACHE_PRODOTTO)
     public ProdottoDTO trovaPerId(Long id) {
-        return esegui(() -> restClient.get()
-                .uri("/prodotti/{id}", id)
+        return dati(esegui(() -> restClient.get()
+                .uri("/products/{id}", id)
                 .retrieve()
-                .body(ProdottoDTO.class));
+                .body(PRODOTTO)));
+    }
+
+    private static <T> T dati(RispostaApi<T> risposta) {
+        return risposta == null ? null : risposta.data();
     }
 
     private <T> T esegui(Supplier<T> chiamata) {
@@ -74,7 +82,7 @@ public class ProdottoApiClient {
 
     private String messaggioDiErrore(RestClientResponseException ex) {
         try {
-            ApiErrorDTO errore = ex.getResponseBodyAs(ApiErrorDTO.class);
+            RispostaApi<?> errore = ex.getResponseBodyAs(RispostaApi.class);
             if (errore != null && errore.message() != null) {
                 return errore.message();
             }

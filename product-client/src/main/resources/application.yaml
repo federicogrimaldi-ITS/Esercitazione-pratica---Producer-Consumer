@@ -17,4 +17,4 @@ server:
 
 # Indirizzo della Producer API (product-api)
 api:
-  base-url: http://localhost:8081/api
+  base-url: http://localhost:8080/api

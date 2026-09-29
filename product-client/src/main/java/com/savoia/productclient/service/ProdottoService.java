@@ -1,6 +1,7 @@
 package com.savoia.productclient.service;
 
 import com.savoia.productclient.client.ProdottoApiClient;
+import com.savoia.productclient.model.Categoria;
 import com.savoia.productclient.model.CriteriRicerca;
 import com.savoia.productclient.model.ProdottoDTO;
 import org.springframework.stereotype.Service;
@@ -31,12 +32,13 @@ public class ProdottoService {
     /**
      * Categorie distinte presenti nel catalogo, ordinate alfabeticamente (per il filtro della ricerca).
      */
-    public List<String> categorie() {
+    public List<Categoria> categorie() {
         return prodottoApiClient.trovaTutti(CriteriRicerca.nessuno()).stream()
                 .map(ProdottoDTO::categoria)
                 .filter(Objects::nonNull)
                 .distinct()
                 .sorted()
+                .map(Categoria::new)
                 .toList();
     }
 }

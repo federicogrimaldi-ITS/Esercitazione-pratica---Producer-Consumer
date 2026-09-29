@@ -5,7 +5,7 @@ della Producer Application (`product-api`). Il Consumer **non accede al database
 tutti i dati arrivano via HTTP dalla Producer.
 
 ```
-Browser → Consumer (:8082) → HTTP/REST → Producer (:8081) → Service → Repository → MySQL
+Browser → Consumer (:8082) → HTTP/REST → Producer (:8080) → Service → Repository → MySQL
 ```
 
 ## Collaboratori
@@ -47,7 +47,7 @@ Controller → Service → API Client → REST API → JSON → DTO → Thymelea
 
 - JDK 25
 - Maven 3.9+ (oppure il Maven wrapper incluso, `./mvnw`)
-- Producer Application `product-api` in esecuzione su `http://localhost:8081`
+- Producer Application `product-api` in esecuzione su `http://localhost:8080` (context path `/api`)
   (con il relativo database MySQL)
 
 ## Configurazione MySQL
@@ -58,7 +58,7 @@ del database e il caricamento dei dati di prova.
 
 ## Configurazione della Producer
 
-La Producer deve esporre la REST API su `http://localhost:8081/api/prodotti`.
+La Producer espone la REST API su `http://localhost:8080/api/products` (porta 8080 e context path `/api` definiti nell'`application.yaml` di `product-api`).
 Configurazione e avvio sono descritti nel README di `product-api`.
 
 ## Configurazione del Consumer
@@ -82,15 +82,15 @@ server:
   port: 8082
 
 api:
-  base-url: http://localhost:8081/api   # indirizzo della Producer API
+  base-url: http://localhost:8080/api   # indirizzo della Producer API
 ```
 
 L'indirizzo della Producer non è scritto nel codice Java: si può cambiare anche all'avvio,
-ad esempio `--api.base-url=http://altro-host:8081/api`.
+ad esempio `--api.base-url=http://altro-host:8080/api`.
 
 ## Avvio
 
-1. Avviare MySQL e la Producer (`product-api`) sulla porta 8081.
+1. Avviare MySQL e la Producer (`product-api`) sulla porta 8080.
 2. Avviare il Consumer:
 
    ```bash
@@ -119,30 +119,63 @@ Test automatici (non richiedono né Producer né MySQL: le risposte HTTP sono si
 |-----|-------------|
 | `GET /prodotti` | Tabella di tutti i prodotti |
 | `GET /prodotti?nome=laptop` | Ricerca per nome |
-| `GET /prodotti?categoria=Informatica` | Filtro per categoria |
-| `GET /prodotti?nome=pro&categoria=Accessori` | Ricerca combinata |
+| `GET /prodotti?categoria=INFORMATICA` | Filtro per categoria |
+| `GET /prodotti?nome=pro&categoria=ACCESSORI` | Ricerca combinata |
 | `GET /prodotti/{id}` | Dettaglio del prodotto |
 
 ## REST API utilizzate (esposte dalla Producer)
 
 | Metodo | Endpoint | Uso nel Consumer |
 |--------|----------|------------------|
-| `GET` | `/api/prodotti` | Lista prodotti e categorie disponibili nel filtro |
-| `GET` | `/api/prodotti?nome={nome}&categoria={categoria}` | Ricerca dalla pagina `/prodotti` |
-| `GET` | `/api/prodotti/{id}` | Pagina di dettaglio |
+| `GET` | `/api/products` | Lista prodotti e categorie disponibili nel filtro |
+| `GET` | `/api/products?nome={nome}&categoria={CATEGORIA}` | Ricerca dalla pagina `/prodotti` |
+| `GET` | `/api/products/{id}` | Pagina di dettaglio |
 
-Elenco completo delle REST API della Producer (vedere README di `product-api`):
+> Stato della Producer: al momento è implementata solo `POST /api/products`; le GET sono
+> ancora da completare. I nomi dei parametri di ricerca (`nome`, `categoria`) seguono il testo
+> dell'esercitazione e andranno riverificati quando le GET saranno pronte. Finché mancano,
+> il Consumer mostra la pagina di errore con il codice restituito dalla Producer.
+
+Elenco delle REST API della Producer (vedere README di `product-api`):
 
 | Metodo | Endpoint | Risposta |
 |--------|----------|----------|
-| `GET` | `/api/prodotti` | 200 OK |
-| `GET` | `/api/prodotti/{id}` | 200 OK / 404 Not Found |
-| `GET` | `/api/prodotti?categoria=...` | 200 OK |
-| `GET` | `/api/prodotti?nome=...` | 200 OK |
-| `GET` | `/api/prodotti?sort=prezzo&direction=asc\|desc` | 200 OK |
-| `POST` | `/api/prodotti` | 201 Created / 400 Bad Request |
-| `PUT` | `/api/prodotti/{id}` | 200 OK / 404 Not Found |
-| `DELETE` | `/api/prodotti/{id}` | 204 No Content / 404 Not Found |
+| `POST` | `/api/products` | 201 Created / 400 Bad Request |
+| `GET` | `/api/products` | 200 OK |
+| `GET` | `/api/products/{id}` | 200 OK / 404 Not Found |
+| `PUT` | `/api/products/{id}` | 200 OK / 404 Not Found |
+| `DELETE` | `/api/products/{id}` | 204 No Content / 404 Not Found |
+
+### Formato delle risposte della Producer
+
+Ogni risposta è avvolta nella busta `ResponseApi`; il Consumer legge il campo `data`
+(record `RispostaApi<T>`):
+
+```json
+{
+  "data": {
+    "id": 1,
+    "name": "Laptop Pro 15",
+    "description": "Notebook professionale...",
+    "price": 1299.90,
+    "category": "INFORMATICA",
+    "quantity": 15,
+    "dataCreazione": "2026-09-01T09:00:00"
+  },
+  "error": null,
+  "errors": null,
+  "httpStatus": "200 OK",
+  "message": null,
+  "timestamp": "2026-09-29T10:00:00"
+}
+```
+
+In caso di errore `data` è `null` e il testo da mostrare è in `message`
+(per i 400 di validazione anche `errors`, mappa campo → messaggio).
+
+Le categorie sono i valori dell'enum `Categoria` della Producer (`ACCESSORI`, `AUDIO`,
+`INFORMATICA`, `MOBILE`, `NETWORKING`, `STORAGE`, `UFFICIO`, `WEARABLE`): il Consumer invia il
+codice in maiuscolo e mostra all'utente l'etichetta leggibile ("Informatica").
 
 ## Gestione degli errori
 
@@ -152,7 +185,7 @@ da `WebExceptionHandler` (`@ControllerAdvice`) con la pagina `errore.html`:
 | Situazione | Eccezione | Pagina mostrata |
 |------------|-----------|-----------------|
 | Producer spenta / timeout | `ApiNonDisponibileException` | 503 – "Impossibile recuperare i prodotti. Il servizio API non è attualmente disponibile." |
-| Prodotto inesistente (404) | `ProdottoNonTrovatoException` | 404 – messaggio restituito dall'API ("Prodotto non trovato") |
+| Prodotto inesistente (404) | `ProdottoNonTrovatoException` | 404 – messaggio restituito dall'API ("Prodotto non trovato con id: …") |
 | Altro errore HTTP della Producer | `ApiErroreException` | 502 – codice e messaggio dell'API |
 
 ## Struttura del progetto
@@ -161,7 +194,7 @@ da `WebExceptionHandler` (`@ControllerAdvice`) con la pagina `errore.html`:
 src/main/java/com/savoia/productclient
 ├── ProductClientApplication.java
 ├── config       ApiProperties (api.base-url), CacheConfig
-├── model        ProdottoDTO, CriteriRicerca, ApiErrorDTO
+├── model        ProdottoDTO, Categoria, CriteriRicerca, RispostaApi
 ├── client       ProdottoApiClient (RestClient)
 ├── exception    eccezioni applicative + WebExceptionHandler
 ├── service      ProdottoService
@@ -174,14 +207,15 @@ src/main/resources
 
 Separazione dei modelli: l'Entity JPA e i DTO dell'API restano nella Producer; il Consumer
 usa un proprio modello client (`ProdottoDTO`, record immutabile con `BigDecimal` per il
-prezzo e `LocalDateTime` per la data).
+prezzo e `LocalDateTime` per la data) con nomi italiani, mappati sui campi JSON inglesi della
+Producer tramite `@JsonProperty`.
 
 ## Funzionalità aggiuntive
 
-- **Cache locale** (livello esperto): le risposte di `GET /api/prodotti` (per criteri di
-  ricerca) e `GET /api/prodotti/{id}` sono conservate in una cache Caffeine in memoria per
+- **Cache locale** (livello esperto): le risposte di `GET /api/products` (per criteri di
+  ricerca) e `GET /api/products/{id}` sono conservate in una cache Caffeine in memoria per
   60 secondi; nel frattempo le stesse richieste non generano nuove chiamate HTTP. Gli errori
   non vengono messi in cache.
 - **Timeout configurabili** verso la Producer, così una Producer lenta produce il messaggio
   di servizio non disponibile invece di bloccare la pagina.
-- **Test automatici** (30 test) su client HTTP, gestione errori, pagine web e cache.
+- **Test automatici** (35 test) su client HTTP, gestione errori, pagine web e cache.

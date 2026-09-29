@@ -19,8 +19,8 @@
             Categoria
             <select name="categoria">
                 <option value="" th:selected="${criteri.categoria == null}">Tutte</option>
-                <option th:each="c : ${categorie}" th:value="${c}" th:text="${c}"
-                        th:selected="${c == criteri.categoria}">Informatica</option>
+                <option th:each="c : ${categorie}" th:value="${c.codice}" th:text="${c.etichetta}"
+                        th:selected="${c.codice == criteri.categoria}">Informatica</option>
             </select>
         </label>
         <button class="button" type="submit">Cerca</button>
@@ -44,7 +44,7 @@
             <tr th:each="p : ${prodotti}">
                 <td th:text="${p.id}">1</td>
                 <td><a th:href="@{/prodotti/{id}(id=${p.id})}" th:text="${p.nome}">Laptop Pro 15</a></td>
-                <td th:text="${p.categoria}">Informatica</td>
+                <td th:text="${p.categoriaLeggibile}">Informatica</td>
                 <td class="numero"
                     th:text="|€ ${#numbers.formatDecimal(p.prezzo, 1, 'POINT', 2, 'COMMA')}|">€ 1.299,90</td>
                 <td class="numero" th:text="${p.quantita}">15</td>

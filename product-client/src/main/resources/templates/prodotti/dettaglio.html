@@ -15,7 +15,7 @@
 
         <dl>
             <dt>Categoria</dt>
-            <dd th:text="${prodotto.categoria}">Informatica</dd>
+            <dd th:text="${prodotto.categoriaLeggibile}">Informatica</dd>
 
             <dt>Prezzo</dt>
             <dd th:text="|€ ${#numbers.formatDecimal(prodotto.prezzo, 1, 'POINT', 2, 'COMMA')}|">€ 1.299,90</dd>

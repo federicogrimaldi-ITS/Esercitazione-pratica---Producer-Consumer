@@ -1,6 +1,7 @@
 package com.savoia.productclient.service;
 
 import com.savoia.productclient.client.ProdottoApiClient;
+import com.savoia.productclient.model.Categoria;
 import com.savoia.productclient.model.CriteriRicerca;
 import com.savoia.productclient.model.ProdottoDTO;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,7 @@ class ProdottoServiceTest {
     void cercaProdottiRestituisceIProdottiDellApi() {
         CriteriRicerca criteri = new CriteriRicerca("laptop", null);
         List<ProdottoDTO> prodotti = List.of(
-                new ProdottoDTO(1L, "Laptop Pro 15", null, new BigDecimal("1299.90"), "Informatica", 15, null));
+                new ProdottoDTO(1L, "Laptop Pro 15", null, new BigDecimal("1299.90"), "INFORMATICA", 15, null));
         when(client.trovaTutti(criteri)).thenReturn(prodotti);
 
         assertThat(service.cercaProdotti(criteri)).isEqualTo(prodotti);
@@ -29,7 +30,7 @@ class ProdottoServiceTest {
 
     @Test
     void trovaProdottoRestituisceIlDettaglioDellApi() {
-        ProdottoDTO laptop = new ProdottoDTO(1L, "Laptop Pro 15", null, new BigDecimal("1299.90"), "Informatica", 15, null);
+        ProdottoDTO laptop = new ProdottoDTO(1L, "Laptop Pro 15", null, new BigDecimal("1299.90"), "INFORMATICA", 15, null);
         when(client.trovaPerId(1L)).thenReturn(laptop);
 
         assertThat(service.trovaProdotto(1L)).isEqualTo(laptop);
@@ -38,12 +39,13 @@ class ProdottoServiceTest {
     @Test
     void categorieRestituisceLeCategorieDistinteInOrdineAlfabetico() {
         when(client.trovaTutti(CriteriRicerca.nessuno())).thenReturn(List.of(
-                prodotto("Mouse", "Accessori"),
-                prodotto("Laptop", "Informatica"),
-                prodotto("Cuffie", "Audio"),
-                prodotto("Tastiera", "Accessori")));
+                prodotto("Mouse", "ACCESSORI"),
+                prodotto("Laptop", "INFORMATICA"),
+                prodotto("Cuffie", "AUDIO"),
+                prodotto("Tastiera", "ACCESSORI")));
 
-        assertThat(service.categorie()).containsExactly("Accessori", "Audio", "Informatica");
+        assertThat(service.categorie()).containsExactly(
+                new Categoria("ACCESSORI"), new Categoria("AUDIO"), new Categoria("INFORMATICA"));
     }
 
     private static ProdottoDTO prodotto(String nome, String categoria) {
