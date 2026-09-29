@@ -1,3 +1,41 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
 spring:
   application:
     name: product-api
+
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOSTNAME}:${MYSQL_PORT}/${MYSQL_DATABASE_NAME}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      dialect: org.hibernate.dialect.MySQLDialect
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        highlight_sql: true
+    show-sql: true
+    open-in-view: false
+
+  main:
+    banner-mode: off
+
+spring-doc:
+  swagger-ui:
+    enabled: true
+    # localhost:8080/api/swagger-ui.html
+    path: /swagger-ui.html
+
+logging:
+  level:
+    com.project.budgethouse: info
+    org.hibernate.orm.jdbc.bind: trace
+    org.springframework: info
