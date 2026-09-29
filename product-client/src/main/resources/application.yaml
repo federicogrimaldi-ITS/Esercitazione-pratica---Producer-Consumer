@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: product-client
+
+server:
+  port: 8082
+
+# Indirizzo della Producer API (product-api)
+api:
+  base-url: http://localhost:8081/api
