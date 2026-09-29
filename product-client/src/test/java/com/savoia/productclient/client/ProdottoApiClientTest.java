@@ -48,6 +48,13 @@ class ProdottoApiClientTest {
             }
             """;
 
+    /** Busta ResponseApi con cui la Producer restituisce ogni risposta corretta (il contenuto è in data). */
+    static String risposta(String data) {
+        return """
+                {"data": %s, "error": null, "errors": null, "httpStatus": "200 OK", "message": null, "timestamp": "2026-09-29T10:00:00.123456789"}
+                """.formatted(data);
+    }
+
     @TestConfiguration
     @EnableConfigurationProperties(ApiProperties.class)
     static class Config {
@@ -63,7 +70,7 @@ class ProdottoApiClientTest {
     void trovaTuttiSenzaFiltriChiamaLaListaCompleta() {
         server.expect(requestTo("http://producer.test/api/products"))
                 .andExpect(method(GET))
-                .andRespond(withSuccess("[" + PRODOTTO_JSON + "]", MediaType.APPLICATION_JSON));
+                .andRespond(withSuccess(risposta("[" + PRODOTTO_JSON + "]"), MediaType.APPLICATION_JSON));
 
         List<ProdottoDTO> prodotti = client.trovaTutti(CriteriRicerca.nessuno());
 
@@ -74,7 +81,7 @@ class ProdottoApiClientTest {
     @Test
     void ricercaPerNomeUsaLEndpointSearch() {
         server.expect(requestTo("http://producer.test/api/products/search?name=laptop%20pro%2015"))
-                .andRespond(withSuccess("[" + PRODOTTO_JSON + "]", MediaType.APPLICATION_JSON));
+                .andRespond(withSuccess(risposta("[" + PRODOTTO_JSON + "]"), MediaType.APPLICATION_JSON));
 
         List<ProdottoDTO> prodotti = client.trovaTutti(new CriteriRicerca("laptop pro 15", null));
 
@@ -85,7 +92,7 @@ class ProdottoApiClientTest {
     @Test
     void filtroPerCategoriaUsaLEndpointCategory() {
         server.expect(requestTo("http://producer.test/api/products/category/INFORMATICA"))
-                .andRespond(withSuccess("[" + PRODOTTO_JSON + "]", MediaType.APPLICATION_JSON));
+                .andRespond(withSuccess(risposta("[" + PRODOTTO_JSON + "]"), MediaType.APPLICATION_JSON));
 
         List<ProdottoDTO> prodotti = client.trovaTutti(new CriteriRicerca(null, "informatica"));
 
@@ -96,12 +103,12 @@ class ProdottoApiClientTest {
     @Test
     void nomeECategoriaInsiemeFiltranoPerNomeIProdottiDellaCategoria() {
         server.expect(requestTo("http://producer.test/api/products/category/INFORMATICA"))
-                .andRespond(withSuccess("""
+                .andRespond(withSuccess(risposta("""
                         [
                           {"id": 1, "name": "Laptop Pro 15", "price": 1299.90, "category": "INFORMATICA", "quantity": 15},
                           {"id": 3, "name": "Monitor 27 4K", "price": 449.90, "category": "INFORMATICA", "quantity": 12}
                         ]
-                        """, MediaType.APPLICATION_JSON));
+                        """), MediaType.APPLICATION_JSON));
 
         List<ProdottoDTO> prodotti = client.trovaTutti(new CriteriRicerca("monitor 27 4k", "INFORMATICA"));
 
@@ -112,7 +119,7 @@ class ProdottoApiClientTest {
     @Test
     void trovaPerIdConverteIlJsonNelDto() {
         server.expect(requestTo("http://producer.test/api/products/1"))
-                .andRespond(withSuccess(PRODOTTO_JSON, MediaType.APPLICATION_JSON));
+                .andRespond(withSuccess(risposta(PRODOTTO_JSON), MediaType.APPLICATION_JSON));
 
         ProdottoDTO prodotto = client.trovaPerId(1L);
 

@@ -153,24 +153,35 @@ Elenco delle REST API della Producer (vedere README di `product-api`):
 | `PUT` | `/api/products/{id}` | 200 OK / 404 Not Found |
 | `DELETE` | `/api/products/{id}` | 204 No Content / 404 Not Found |
 
+La configurazione Swagger della Producer dichiara uno schema `bearerAuth`, ma la Producer non
+usa Spring Security: il Consumer non invia token.
+
 ### Formato delle risposte della Producer
 
-Le risposte corrette contengono direttamente il prodotto (o la lista di prodotti):
+Tutte le risposte (corrette ed errori) sono avvolte nella busta `ResponseApi`
+(record `RispostaApi<T>` nel Consumer). Il prodotto o la lista si trovano in `data`:
 
 ```json
 {
-  "id": 1,
-  "name": "Laptop Pro 15",
-  "description": "Notebook professionale...",
-  "price": 1299.90,
-  "category": "INFORMATICA",
-  "quantity": 15,
-  "dataCreazione": "2026-09-01T09:00:00"
+  "data": {
+    "id": 1,
+    "name": "Laptop Pro 15",
+    "description": "Notebook professionale...",
+    "price": 1299.90,
+    "category": "INFORMATICA",
+    "quantity": 15,
+    "dataCreazione": "2026-09-01T09:00:00"
+  },
+  "error": null,
+  "errors": null,
+  "httpStatus": "200 OK",
+  "message": null,
+  "timestamp": "2026-09-29T10:00:00"
 }
 ```
 
-Gli errori sono restituiti nella busta `ResponseApi` (record `RispostaApi` nel Consumer);
-il testo mostrato all'utente è `message`:
+In caso di errore `data` è `null` e il testo mostrato all'utente è `message`
+(per i 400 di validazione anche `errors`, mappa campo → messaggio):
 
 ```json
 {

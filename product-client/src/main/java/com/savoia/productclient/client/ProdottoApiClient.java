@@ -28,7 +28,11 @@ import java.util.function.Supplier;
 @Component
 public class ProdottoApiClient {
 
-    private static final ParameterizedTypeReference<List<ProdottoDTO>> LISTA_PRODOTTI =
+    private static final ParameterizedTypeReference<RispostaApi<List<ProdottoDTO>>> LISTA_PRODOTTI =
+            new ParameterizedTypeReference<>() {
+            };
+
+    private static final ParameterizedTypeReference<RispostaApi<ProdottoDTO>> PRODOTTO =
             new ParameterizedTypeReference<>() {
             };
 
@@ -60,10 +64,10 @@ public class ProdottoApiClient {
                     .toList();
         }
         if (criteri.nome() != null) {
-            return esegui(() -> restClient.get()
+            return dati(esegui(() -> restClient.get()
                     .uri(uri -> uri.path("/products/search").queryParam("name", criteri.nome()).build())
                     .retrieve()
-                    .body(LISTA_PRODOTTI));
+                    .body(LISTA_PRODOTTI)));
         }
         return lista("/products");
     }
@@ -71,17 +75,22 @@ public class ProdottoApiClient {
     /** {@code GET /products/{id}}. */
     @Cacheable(CacheConfig.CACHE_PRODOTTO)
     public ProdottoDTO trovaPerId(Long id) {
-        return esegui(() -> restClient.get()
+        return dati(esegui(() -> restClient.get()
                 .uri("/products/{id}", id)
                 .retrieve()
-                .body(ProdottoDTO.class));
+                .body(PRODOTTO)));
     }
 
     private List<ProdottoDTO> lista(String uri, Object... variabili) {
-        return esegui(() -> restClient.get()
+        return dati(esegui(() -> restClient.get()
                 .uri(uri, variabili)
                 .retrieve()
-                .body(LISTA_PRODOTTI));
+                .body(LISTA_PRODOTTI)));
+    }
+
+    /** Estrae il contenuto utile dalla busta {@code ResponseApi} della Producer. */
+    private static <T> T dati(RispostaApi<T> risposta) {
+        return risposta == null ? null : risposta.data();
     }
 
     private <T> T esegui(Supplier<T> chiamata) {
