@@ -22,4 +22,8 @@ public class ProdottoService {
     public List<ProdottoDTO> cercaProdotti(CriteriRicerca criteri) {
         return prodottoApiClient.trovaTutti(criteri);
     }
+
+    public ProdottoDTO trovaProdotto(Long id) {
+        return prodottoApiClient.trovaPerId(id);
+    }
 }

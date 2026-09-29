@@ -26,4 +26,12 @@ class ProdottoServiceTest {
 
         assertThat(service.cercaProdotti(criteri)).isEqualTo(prodotti);
     }
+
+    @Test
+    void trovaProdottoRestituisceIlDettaglioDellApi() {
+        ProdottoDTO laptop = new ProdottoDTO(1L, "Laptop Pro 15", null, new BigDecimal("1299.90"), "Informatica", 15, null);
+        when(client.trovaPerId(1L)).thenReturn(laptop);
+
+        assertThat(service.trovaProdotto(1L)).isEqualTo(laptop);
+    }
 }

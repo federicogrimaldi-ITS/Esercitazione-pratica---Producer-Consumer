@@ -73,3 +73,23 @@ tbody tr:hover { background: #f9fafb; }
 .numero { text-align: right; white-space: nowrap; }
 
 .vuoto { color: #6b7280; }
+
+.scheda {
+    margin-top: 16px;
+    padding: 24px;
+    background: #fff;
+    border: 1px solid var(--bordo);
+    border-radius: 6px;
+}
+
+.scheda h2 { font-size: 1.1rem; margin-bottom: 4px; }
+
+.scheda dl {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 8px 16px;
+    margin: 0;
+}
+
+.scheda dt { font-weight: 600; }
+.scheda dd { margin: 0; }

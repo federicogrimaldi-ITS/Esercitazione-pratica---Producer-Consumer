@@ -1,6 +1,7 @@
 package com.savoia.productclient.controller;
 
 import com.savoia.productclient.exception.ApiNonDisponibileException;
+import com.savoia.productclient.exception.ProdottoNonTrovatoException;
 import com.savoia.productclient.model.CriteriRicerca;
 import com.savoia.productclient.model.ProdottoDTO;
 import com.savoia.productclient.service.ProdottoService;
@@ -73,5 +74,36 @@ class ProdottoWebControllerTest {
         mvc.perform(get("/prodotti"))
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(content().string(containsString("Il servizio API non è attualmente disponibile.")));
+    }
+
+    @Test
+    void dettaglioMostraTuttiIDatiDelProdotto() throws Exception {
+        when(prodottoService.trovaProdotto(1L)).thenReturn(LAPTOP);
+
+        mvc.perform(get("/prodotti/1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("prodotti/dettaglio"))
+                .andExpect(content().string(containsString("Laptop Pro 15")))
+                .andExpect(content().string(containsString("Informatica")))
+                .andExpect(content().string(containsString("€ 1.299,90")))
+                .andExpect(content().string(containsString("15")))
+                .andExpect(content().string(containsString("Notebook professionale con processore Intel Core i7")))
+                .andExpect(content().string(containsString("01/09/2026 09:00")));
+    }
+
+    @Test
+    void dettaglioDiUnProdottoInesistenteRestituisce404() throws Exception {
+        when(prodottoService.trovaProdotto(9999L)).thenThrow(new ProdottoNonTrovatoException("Prodotto non trovato"));
+
+        mvc.perform(get("/prodotti/9999"))
+                .andExpect(status().isNotFound())
+                .andExpect(view().name("errore"))
+                .andExpect(content().string(containsString("Prodotto non trovato")));
+    }
+
+    @Test
+    void idNonNumericoRestituisce400() throws Exception {
+        mvc.perform(get("/prodotti/abc"))
+                .andExpect(status().isBadRequest());
     }
 }
