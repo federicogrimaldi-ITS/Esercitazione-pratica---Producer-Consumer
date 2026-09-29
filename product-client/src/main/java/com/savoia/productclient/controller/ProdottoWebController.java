@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class ProdottoWebController {
@@ -22,8 +23,13 @@ public class ProdottoWebController {
     }
 
     @GetMapping("/prodotti")
-    public String lista(Model model) {
-        model.addAttribute("prodotti", prodottoService.cercaProdotti(CriteriRicerca.nessuno()));
+    public String lista(@RequestParam(required = false) String nome,
+                        @RequestParam(required = false) String categoria,
+                        Model model) {
+        CriteriRicerca criteri = new CriteriRicerca(nome, categoria);
+        model.addAttribute("prodotti", prodottoService.cercaProdotti(criteri));
+        model.addAttribute("categorie", prodottoService.categorie());
+        model.addAttribute("criteri", criteri);
         return "prodotti/lista";
     }
 

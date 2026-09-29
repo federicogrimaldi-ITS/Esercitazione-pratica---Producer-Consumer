@@ -10,6 +10,23 @@
 <main class="container">
     <h1>Prodotti</h1>
 
+    <form class="ricerca" th:action="@{/prodotti}" method="get">
+        <label>
+            Cerca prodotto
+            <input type="search" name="nome" th:value="${criteri.nome}" placeholder="es. laptop">
+        </label>
+        <label>
+            Categoria
+            <select name="categoria">
+                <option value="" th:selected="${criteri.categoria == null}">Tutte</option>
+                <option th:each="c : ${categorie}" th:value="${c}" th:text="${c}"
+                        th:selected="${c == criteri.categoria}">Informatica</option>
+            </select>
+        </label>
+        <button class="button" type="submit">Cerca</button>
+        <a th:unless="${criteri.vuoto}" th:href="@{/prodotti}">Azzera filtri</a>
+    </form>
+
     <p th:if="${#lists.isEmpty(prodotti)}" class="vuoto">Nessun prodotto trovato.</p>
 
     <div class="table-wrapper" th:unless="${#lists.isEmpty(prodotti)}">

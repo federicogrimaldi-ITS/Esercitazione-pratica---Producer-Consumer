@@ -93,3 +93,32 @@ tbody tr:hover { background: #f9fafb; }
 
 .scheda dt { font-weight: 600; }
 .scheda dd { margin: 0; }
+
+.ricerca {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 16px;
+    background: #fff;
+    border: 1px solid var(--bordo);
+    border-radius: 6px;
+}
+
+.ricerca label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-weight: 600;
+    flex: 1 1 200px;
+}
+
+.ricerca input,
+.ricerca select {
+    padding: 8px;
+    border: 1px solid var(--bordo);
+    border-radius: 6px;
+    font: inherit;
+    font-weight: normal;
+}

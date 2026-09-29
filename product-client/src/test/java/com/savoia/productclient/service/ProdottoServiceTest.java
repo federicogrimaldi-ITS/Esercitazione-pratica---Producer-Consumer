@@ -34,4 +34,19 @@ class ProdottoServiceTest {
 
         assertThat(service.trovaProdotto(1L)).isEqualTo(laptop);
     }
+
+    @Test
+    void categorieRestituisceLeCategorieDistinteInOrdineAlfabetico() {
+        when(client.trovaTutti(CriteriRicerca.nessuno())).thenReturn(List.of(
+                prodotto("Mouse", "Accessori"),
+                prodotto("Laptop", "Informatica"),
+                prodotto("Cuffie", "Audio"),
+                prodotto("Tastiera", "Accessori")));
+
+        assertThat(service.categorie()).containsExactly("Accessori", "Audio", "Informatica");
+    }
+
+    private static ProdottoDTO prodotto(String nome, String categoria) {
+        return new ProdottoDTO(null, nome, null, BigDecimal.ONE, categoria, 1, null);
+    }
 }

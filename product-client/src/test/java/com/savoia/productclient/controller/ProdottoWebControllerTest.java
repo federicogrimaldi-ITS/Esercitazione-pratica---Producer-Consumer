@@ -106,4 +106,27 @@ class ProdottoWebControllerTest {
         mvc.perform(get("/prodotti/abc"))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void ricercaInoltraNomeECategoriaEMantieneIValoriNelForm() throws Exception {
+        when(prodottoService.cercaProdotti(new CriteriRicerca("laptop", "Informatica"))).thenReturn(List.of(LAPTOP));
+        when(prodottoService.categorie()).thenReturn(List.of("Accessori", "Informatica"));
+
+        mvc.perform(get("/prodotti").param("nome", "laptop").param("categoria", "Informatica"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Laptop Pro 15")))
+                .andExpect(content().string(containsString("name=\"nome\" value=\"laptop\"")))
+                .andExpect(content().string(containsString("<option value=\"Informatica\" selected=\"selected\">Informatica</option>")))
+                .andExpect(content().string(containsString("<option value=\"Accessori\">Accessori</option>")));
+    }
+
+    @Test
+    void ricercaConCampiVuotiEquivaleAllaListaCompleta() throws Exception {
+        when(prodottoService.cercaProdotti(CriteriRicerca.nessuno())).thenReturn(List.of(LAPTOP));
+
+        mvc.perform(get("/prodotti").param("nome", "").param("categoria", ""))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Laptop Pro 15")))
+                .andExpect(content().string(containsString("<option value=\"\" selected=\"selected\">Tutte</option>")));
+    }
 }

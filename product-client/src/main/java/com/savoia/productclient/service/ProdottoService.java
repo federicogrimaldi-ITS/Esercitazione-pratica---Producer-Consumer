@@ -6,6 +6,7 @@ import com.savoia.productclient.model.ProdottoDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Logica applicativa del Consumer: i dati arrivano esclusivamente dalla Producer API.
@@ -25,5 +26,17 @@ public class ProdottoService {
 
     public ProdottoDTO trovaProdotto(Long id) {
         return prodottoApiClient.trovaPerId(id);
+    }
+
+    /**
+     * Categorie distinte presenti nel catalogo, ordinate alfabeticamente (per il filtro della ricerca).
+     */
+    public List<String> categorie() {
+        return prodottoApiClient.trovaTutti(CriteriRicerca.nessuno()).stream()
+                .map(ProdottoDTO::categoria)
+                .filter(Objects::nonNull)
+                .distinct()
+                .sorted()
+                .toList();
     }
 }
