@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Errore - Catalogo prodotti</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<main class="container">
+    <div class="alert">
+        <h1 th:text="${titolo}">Impossibile recuperare i prodotti.</h1>
+        <p th:text="${messaggio}">Il servizio API non è attualmente disponibile.</p>
+    </div>
+    <a class="button" th:href="@{/prodotti}">Torna ai prodotti</a>
+</main>
+</body>
+</html>
