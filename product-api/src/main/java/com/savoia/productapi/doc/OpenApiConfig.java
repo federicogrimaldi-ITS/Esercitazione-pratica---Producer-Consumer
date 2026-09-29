@@ -12,14 +12,14 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
-@SecurityScheme(
+/*@SecurityScheme(
         name = "bearerAuth",
         description = "JWT user",
         scheme = "bearer",
         type = SecuritySchemeType.HTTP,
         bearerFormat = "JWT",
         in = SecuritySchemeIn.HEADER
-)
+)*/
 @Configuration
 public class OpenApiConfig {
 
@@ -30,8 +30,8 @@ public class OpenApiConfig {
         serverDev.setUrl("http://localhost:8080");
         serverDev.setDescription("Development");
 
-        SecurityRequirement security = new SecurityRequirement();
-        security.addList("bearerAuth");
+       /* SecurityRequirement security = new SecurityRequirement();
+        security.addList("bearerAuth");*/
 
         Info info = new Info()
                 .title("Management System API")
@@ -40,7 +40,7 @@ public class OpenApiConfig {
 
         return new OpenAPI()
                 .info(info)
-                .servers(List.of(serverDev))
-                .security(List.of(security));
+                .servers(List.of(serverDev));
+                //.security(List.of(security));
     }
 }

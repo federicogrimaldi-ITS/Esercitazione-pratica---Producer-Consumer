@@ -37,4 +37,13 @@ public class ResponseApi<T> {
                 .build();
         return ResponseEntity.status(response.getHttpStatus()).body(response);
     }
+
+    public static <T> ResponseEntity<ResponseApi<T>> buildResponse(HttpStatus status, String message) {
+        ResponseApi<T> response = ResponseApi.<T>builder()
+                .timestamp(LocalDateTime.now())
+                .httpStatus(status)
+                .message(message)
+                .build();
+        return ResponseEntity.status(response.getHttpStatus()).body(response);
+    }
 }

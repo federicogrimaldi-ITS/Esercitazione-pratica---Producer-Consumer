@@ -2,6 +2,7 @@ package com.savoia.productapi.service;
 
 import com.savoia.productapi.entity.Product;
 import com.savoia.productapi.enums.Category;
+import com.savoia.productapi.exception.ResourceNotFoundException;
 import com.savoia.productapi.payload.request.ProductRequest;
 import com.savoia.productapi.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,36 +24,58 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Product> findAll() {
-        return List.of();
+        return productRepository.findAll();
     }
 
     @Override
     public Product findById(Long id) {
-        return null;
+        return findProductById(id);
     }
 
     @Override
     public Product updateProduct(Long id, ProductRequest productRequest) {
-        return null;
+        Product product = findProductById(id);
+        Product updatedProduct = ProductRequest.mapToEntity(productRequest);
+
+        product.setName(updatedProduct.getName());
+        product.setDescription(updatedProduct.getDescription());
+        product.setPrice(updatedProduct.getPrice());
+        product.setCategory(updatedProduct.getCategory());
+        product.setQuantity(updatedProduct.getQuantity());
+
+        return productRepository.save(product);
     }
 
     @Override
     public void deleteProduct(Long id) {
-
+        Product product = findProductById(id);
+        productRepository.delete(product);
     }
 
     @Override
     public List<Product> findByCategory(Category category) {
-        return List.of();
+        return productRepository
+                .findAll()
+                .stream()
+                .filter(p -> p.getCategory().equals(category))
+                .toList();
     }
 
     @Override
     public List<Product> searchByName(String name) {
-        return List.of();
+        return productRepository
+                .findAll()
+                .stream()
+                .filter(p -> p.getName().equalsIgnoreCase(name))
+                .toList();
     }
 
     @Override
     public List<Product> sortByPrice(Sort.Direction direction) {
-        return List.of();
+        return productRepository.findAll(Sort.by(direction, "price"));
+    }
+
+    protected Product findProductById(Long id){
+        return productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product","Id", id));
     }
 }
