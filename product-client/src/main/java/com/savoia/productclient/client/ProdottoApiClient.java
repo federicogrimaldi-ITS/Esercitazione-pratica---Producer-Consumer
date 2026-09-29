@@ -1,12 +1,14 @@
 package com.savoia.productclient.client;
 
 import com.savoia.productclient.config.ApiProperties;
+import com.savoia.productclient.config.CacheConfig;
 import com.savoia.productclient.exception.ApiErroreException;
 import com.savoia.productclient.exception.ApiNonDisponibileException;
 import com.savoia.productclient.exception.ProdottoNonTrovatoException;
 import com.savoia.productclient.model.ApiErrorDTO;
 import com.savoia.productclient.model.CriteriRicerca;
 import com.savoia.productclient.model.ProdottoDTO;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -22,6 +24,7 @@ import java.util.function.Supplier;
 /**
  * Client HTTP verso la Producer API: unico punto dell'applicazione che conosce gli endpoint REST.
  * Gli errori HTTP e di rete vengono tradotti in eccezioni applicative.
+ * Le risposte corrette sono memorizzate nella cache locale fino alla scadenza; gli errori no.
  */
 @Component
 public class ProdottoApiClient {
@@ -36,6 +39,7 @@ public class ProdottoApiClient {
         this.restClient = builder.baseUrl(apiProperties.baseUrl()).build();
     }
 
+    @Cacheable(CacheConfig.CACHE_PRODOTTI)
     public List<ProdottoDTO> trovaTutti(CriteriRicerca criteri) {
         return esegui(() -> restClient.get()
                 .uri(uri -> uri.path("/prodotti")
@@ -46,6 +50,7 @@ public class ProdottoApiClient {
                 .body(LISTA_PRODOTTI));
     }
 
+    @Cacheable(CacheConfig.CACHE_PRODOTTO)
     public ProdottoDTO trovaPerId(Long id) {
         return esegui(() -> restClient.get()
                 .uri("/prodotti/{id}", id)
