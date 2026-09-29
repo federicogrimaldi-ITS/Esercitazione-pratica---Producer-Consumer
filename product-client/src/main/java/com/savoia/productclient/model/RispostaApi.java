@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 /**
- * Busta JSON ({@code ResponseApi}) con cui la Producer avvolge tutte le risposte:
- * il contenuto utile è in {@code data}, gli errori in {@code message} ed {@code errors}.
+ * Busta JSON ({@code ResponseApi}) con cui la Producer restituisce gli errori:
+ * il testo da mostrare è in {@code message}, i dettagli di validazione in {@code errors}.
  */
 public record RispostaApi<T>(
         LocalDateTime timestamp,

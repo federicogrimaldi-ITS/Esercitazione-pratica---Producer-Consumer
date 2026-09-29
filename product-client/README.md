@@ -118,62 +118,72 @@ Test automatici (non richiedono né Producer né MySQL: le risposte HTTP sono si
 | URL | Descrizione |
 |-----|-------------|
 | `GET /prodotti` | Tabella di tutti i prodotti |
-| `GET /prodotti?nome=laptop` | Ricerca per nome |
+| `GET /prodotti?nome=Laptop Pro 15` | Ricerca per nome (nome completo, vedi nota sotto) |
 | `GET /prodotti?categoria=INFORMATICA` | Filtro per categoria |
-| `GET /prodotti?nome=pro&categoria=ACCESSORI` | Ricerca combinata |
+| `GET /prodotti?nome=Monitor 27 4K&categoria=INFORMATICA` | Ricerca combinata |
 | `GET /prodotti/{id}` | Dettaglio del prodotto |
 
 ## REST API utilizzate (esposte dalla Producer)
 
-| Metodo | Endpoint | Uso nel Consumer |
-|--------|----------|------------------|
-| `GET` | `/api/products` | Lista prodotti e categorie disponibili nel filtro |
-| `GET` | `/api/products?nome={nome}&categoria={CATEGORIA}` | Ricerca dalla pagina `/prodotti` |
-| `GET` | `/api/products/{id}` | Pagina di dettaglio |
+La Producer non combina i filtri in un'unica chiamata: `ProdottoApiClient` sceglie l'endpoint
+in base ai criteri inseriti nella pagina.
 
-> Stato della Producer: al momento è implementata solo `POST /api/products`; le GET sono
-> ancora da completare. I nomi dei parametri di ricerca (`nome`, `categoria`) seguono il testo
-> dell'esercitazione e andranno riverificati quando le GET saranno pronte. Finché mancano,
-> il Consumer mostra la pagina di errore con il codice restituito dalla Producer.
+| Ricerca nella pagina `/prodotti` | Chiamata alla Producer |
+|----------------------------------|------------------------|
+| nessun filtro | `GET /api/products` |
+| solo nome | `GET /api/products/search?name={nome}` |
+| solo categoria | `GET /api/products/category/{CATEGORIA}` |
+| nome + categoria | `GET /api/products/category/{CATEGORIA}`, poi filtro per nome nel Consumer |
+| dettaglio `/prodotti/{id}` | `GET /api/products/{id}` |
+
+> Nota: la ricerca per nome della Producer confronta il **nome completo** senza distinguere
+> maiuscole e minuscole (`Laptop Pro 15` trova il prodotto, `laptop` no). Il filtro applicato dal
+> Consumer nella ricerca combinata usa lo stesso criterio, così i risultati sono coerenti.
 
 Elenco delle REST API della Producer (vedere README di `product-api`):
 
 | Metodo | Endpoint | Risposta |
 |--------|----------|----------|
-| `POST` | `/api/products` | 201 Created / 400 Bad Request |
 | `GET` | `/api/products` | 200 OK |
-| `GET` | `/api/products/{id}` | 200 OK / 404 Not Found |
+| `GET` | `/api/products/{id}` | 200 OK / 404 Not Found / 400 (id non positivo) |
+| `GET` | `/api/products/category/{category}` | 200 OK / 400 (categoria non valida) |
+| `GET` | `/api/products/search?name={name}` | 200 OK |
+| `GET` | `/api/products/sort?direction=ASC\|DESC` | 200 OK |
+| `POST` | `/api/products` | 201 Created / 400 Bad Request |
 | `PUT` | `/api/products/{id}` | 200 OK / 404 Not Found |
 | `DELETE` | `/api/products/{id}` | 204 No Content / 404 Not Found |
 
 ### Formato delle risposte della Producer
 
-Ogni risposta è avvolta nella busta `ResponseApi`; il Consumer legge il campo `data`
-(record `RispostaApi<T>`):
+Le risposte corrette contengono direttamente il prodotto (o la lista di prodotti):
 
 ```json
 {
-  "data": {
-    "id": 1,
-    "name": "Laptop Pro 15",
-    "description": "Notebook professionale...",
-    "price": 1299.90,
-    "category": "INFORMATICA",
-    "quantity": 15,
-    "dataCreazione": "2026-09-01T09:00:00"
-  },
-  "error": null,
-  "errors": null,
-  "httpStatus": "200 OK",
-  "message": null,
-  "timestamp": "2026-09-29T10:00:00"
+  "id": 1,
+  "name": "Laptop Pro 15",
+  "description": "Notebook professionale...",
+  "price": 1299.90,
+  "category": "INFORMATICA",
+  "quantity": 15,
+  "dataCreazione": "2026-09-01T09:00:00"
 }
 ```
 
-In caso di errore `data` è `null` e il testo da mostrare è in `message`
-(per i 400 di validazione anche `errors`, mappa campo → messaggio).
+Gli errori sono restituiti nella busta `ResponseApi` (record `RispostaApi` nel Consumer);
+il testo mostrato all'utente è `message`:
 
-Le categorie sono i valori dell'enum `Categoria` della Producer (`ACCESSORI`, `AUDIO`,
+```json
+{
+  "data": null,
+  "error": "Not Found",
+  "errors": null,
+  "httpStatus": "404 NOT_FOUND",
+  "message": "Product not found with Id: 9999",
+  "timestamp": "2026-09-29T10:41:49"
+}
+```
+
+Le categorie sono i valori dell'enum `Category` della Producer (`ACCESSORI`, `AUDIO`,
 `INFORMATICA`, `MOBILE`, `NETWORKING`, `STORAGE`, `UFFICIO`, `WEARABLE`): il Consumer invia il
 codice in maiuscolo e mostra all'utente l'etichetta leggibile ("Informatica").
 
@@ -185,7 +195,7 @@ da `WebExceptionHandler` (`@ControllerAdvice`) con la pagina `errore.html`:
 | Situazione | Eccezione | Pagina mostrata |
 |------------|-----------|-----------------|
 | Producer spenta / timeout | `ApiNonDisponibileException` | 503 – "Impossibile recuperare i prodotti. Il servizio API non è attualmente disponibile." |
-| Prodotto inesistente (404) | `ProdottoNonTrovatoException` | 404 – messaggio restituito dall'API ("Prodotto non trovato con id: …") |
+| Prodotto inesistente (404) | `ProdottoNonTrovatoException` | 404 – messaggio restituito dall'API ("Product not found with Id: …") |
 | Altro errore HTTP della Producer | `ApiErroreException` | 502 – codice e messaggio dell'API |
 
 ## Struttura del progetto
@@ -218,4 +228,4 @@ Producer tramite `@JsonProperty`.
   non vengono messi in cache.
 - **Timeout configurabili** verso la Producer, così una Producer lenta produce il messaggio
   di servizio non disponibile invece di bloccare la pagina.
-- **Test automatici** (35 test) su client HTTP, gestione errori, pagine web e cache.
+- **Test automatici** (37 test) su client HTTP, gestione errori, pagine web e cache.

@@ -40,8 +40,8 @@ class ProdottoApiClientCacheTest {
 
     @Test
     void laStessaRicercaRipetutaEffettuaUnaSolaChiamataHttp() {
-        server.expect(once(), requestTo("http://producer.test/api/products?nome=laptop"))
-                .andRespond(withSuccess(ProdottoApiClientTest.risposta("[]"), MediaType.APPLICATION_JSON));
+        server.expect(once(), requestTo("http://producer.test/api/products/search?name=laptop"))
+                .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
 
         client.trovaTutti(new CriteriRicerca("laptop", null));
         client.trovaTutti(new CriteriRicerca(" laptop ", ""));
@@ -52,7 +52,7 @@ class ProdottoApiClientCacheTest {
     @Test
     void ilDettaglioRipetutoEffettuaUnaSolaChiamataHttp() {
         server.expect(once(), requestTo("http://producer.test/api/products/1"))
-                .andRespond(withSuccess(ProdottoApiClientTest.risposta(ProdottoApiClientTest.PRODOTTO_JSON), MediaType.APPLICATION_JSON));
+                .andRespond(withSuccess(ProdottoApiClientTest.PRODOTTO_JSON, MediaType.APPLICATION_JSON));
 
         client.trovaPerId(1L);
         client.trovaPerId(1L);
@@ -65,7 +65,7 @@ class ProdottoApiClientCacheTest {
         server.expect(once(), requestTo("http://producer.test/api/products"))
                 .andRespond(withException(new IOException("Connection refused")));
         server.expect(once(), requestTo("http://producer.test/api/products"))
-                .andRespond(withSuccess(ProdottoApiClientTest.risposta("[]"), MediaType.APPLICATION_JSON));
+                .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
 
         assertThatThrownBy(() -> client.trovaTutti(CriteriRicerca.nessuno()));
         client.trovaTutti(CriteriRicerca.nessuno());

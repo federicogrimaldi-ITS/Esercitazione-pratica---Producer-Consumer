@@ -18,7 +18,6 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -29,11 +28,7 @@ import java.util.function.Supplier;
 @Component
 public class ProdottoApiClient {
 
-    private static final ParameterizedTypeReference<RispostaApi<List<ProdottoDTO>>> LISTA_PRODOTTI =
-            new ParameterizedTypeReference<>() {
-            };
-
-    private static final ParameterizedTypeReference<RispostaApi<ProdottoDTO>> PRODOTTO =
+    private static final ParameterizedTypeReference<List<ProdottoDTO>> LISTA_PRODOTTI =
             new ParameterizedTypeReference<>() {
             };
 
@@ -43,27 +38,50 @@ public class ProdottoApiClient {
         this.restClient = builder.baseUrl(apiProperties.baseUrl()).build();
     }
 
+    /**
+     * Traduce i criteri negli endpoint della Producer, che non combinano i filtri:
+     * <ul>
+     *   <li>nessun filtro: {@code GET /products}</li>
+     *   <li>solo nome: {@code GET /products/search?name=...}</li>
+     *   <li>categoria (con o senza nome): {@code GET /products/category/{CATEGORIA}};
+     *       il nome, se presente, viene applicato qui con lo stesso criterio della Producer
+     *       (uguaglianza senza distinzione tra maiuscole e minuscole)</li>
+     * </ul>
+     */
     @Cacheable(CacheConfig.CACHE_PRODOTTI)
     public List<ProdottoDTO> trovaTutti(CriteriRicerca criteri) {
-        return dati(esegui(() -> restClient.get()
-                .uri(uri -> uri.path("/products")
-                        .queryParamIfPresent("nome", Optional.ofNullable(criteri.nome()))
-                        .queryParamIfPresent("categoria", Optional.ofNullable(criteri.categoria()))
-                        .build())
-                .retrieve()
-                .body(LISTA_PRODOTTI)));
+        if (criteri.categoria() != null) {
+            List<ProdottoDTO> perCategoria = lista("/products/category/{categoria}", criteri.categoria());
+            if (criteri.nome() == null) {
+                return perCategoria;
+            }
+            return perCategoria.stream()
+                    .filter(p -> criteri.nome().equalsIgnoreCase(p.nome()))
+                    .toList();
+        }
+        if (criteri.nome() != null) {
+            return esegui(() -> restClient.get()
+                    .uri(uri -> uri.path("/products/search").queryParam("name", criteri.nome()).build())
+                    .retrieve()
+                    .body(LISTA_PRODOTTI));
+        }
+        return lista("/products");
     }
 
+    /** {@code GET /products/{id}}. */
     @Cacheable(CacheConfig.CACHE_PRODOTTO)
     public ProdottoDTO trovaPerId(Long id) {
-        return dati(esegui(() -> restClient.get()
+        return esegui(() -> restClient.get()
                 .uri("/products/{id}", id)
                 .retrieve()
-                .body(PRODOTTO)));
+                .body(ProdottoDTO.class));
     }
 
-    private static <T> T dati(RispostaApi<T> risposta) {
-        return risposta == null ? null : risposta.data();
+    private List<ProdottoDTO> lista(String uri, Object... variabili) {
+        return esegui(() -> restClient.get()
+                .uri(uri, variabili)
+                .retrieve()
+                .body(LISTA_PRODOTTI));
     }
 
     private <T> T esegui(Supplier<T> chiamata) {
