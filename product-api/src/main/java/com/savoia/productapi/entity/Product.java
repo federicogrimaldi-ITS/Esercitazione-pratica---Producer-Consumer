@@ -8,7 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import com.savoia.productapi.enums.Categoria;
+import com.savoia.productapi.enums.Category;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Table(name = "prodotti")
-public class Prodotto {
+public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,7 +39,7 @@ public class Prodotto {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "categoria", nullable = false, length = 100)
-    private Categoria category;
+    private Category category;
 
     @Column(name = "quantita", nullable = false)
     @Builder.Default

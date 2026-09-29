@@ -1,8 +1,8 @@
 package com.savoia.productapi.controller;
 
-import com.savoia.productapi.payload.request.ProdottoRequest;
+import com.savoia.productapi.payload.request.ProductRequest;
 import com.savoia.productapi.payload.response.ResponseApi;
-import com.savoia.productapi.service.ProdottoService;
+import com.savoia.productapi.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/products")
 @RequiredArgsConstructor
 @Validated
-public class ProdottoController {
+public class ProductController {
 
-    private final ProdottoService prodottoService;
+    private final ProductService productService;
 
     @PostMapping
-    public ResponseEntity<?> createProduct(@Valid @RequestBody ProdottoRequest prodottoRequest){
-        return ResponseApi.buildResponse(HttpStatus.CREATED,prodottoService.createProduct(prodottoRequest));
+    public ResponseEntity<?> createProduct(@Valid @RequestBody ProductRequest productRequest){
+        return ResponseApi.buildResponse(HttpStatus.CREATED, productService.createProduct(productRequest));
     }
 }

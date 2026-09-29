@@ -1,6 +1,6 @@
 package com.savoia.productapi.enums;
 
-public enum Categoria {
+public enum Category {
     ACCESSORI,
     AUDIO,
     INFORMATICA,
