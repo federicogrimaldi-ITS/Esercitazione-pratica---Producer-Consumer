@@ -49,3 +49,27 @@ a { color: var(--primario); }
 
 .alert h1 { font-size: 1.25rem; margin-bottom: 8px; }
 .alert p { margin: 0; }
+
+.table-wrapper { overflow-x: auto; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border: 1px solid var(--bordo);
+    border-radius: 6px;
+}
+
+th, td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--bordo);
+}
+
+th { background: #f3f4f6; font-weight: 600; }
+
+tbody tr:hover { background: #f9fafb; }
+
+.numero { text-align: right; white-space: nowrap; }
+
+.vuoto { color: #6b7280; }
