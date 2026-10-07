@@ -38,6 +38,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.PUT;
 
 @RestClientTest(ProdottoApiClient.class)
 @TestPropertySource(properties = {
@@ -276,5 +277,19 @@ class ProdottoApiClientTest {
 
         assertThatThrownBy(() -> client.createProduct(notebookGaming()))
                 .isInstanceOf(ApiAuthenticationException.class);
+    }
+
+    @Test
+    void updateProductSendsAnAuthenticatedPutForThatId() {
+        server.expect(requestTo("http://producer.test/api/products/1"))
+                .andExpect(method(PUT))
+                .andExpect(header("Authorization", BASIC_ADMIN_SECRET))
+                .andExpect(jsonPath("$.name").value("Notebook Gaming"))
+                .andRespond(withSuccess(risposta(PRODOTTO_JSON), MediaType.APPLICATION_JSON));
+
+        ProdottoDTO updated = client.updateProduct(1L, notebookGaming());
+
+        assertThat(updated.id()).isEqualTo(1L);
+        server.verify();
     }
 }

@@ -16,4 +16,9 @@ public class ProductForm {
     private BigDecimal price;
     private String category;
     private Integer quantity;
+
+    public static ProductForm from(ProdottoDTO prodotto) {
+        return new ProductForm(prodotto.nome(), prodotto.descrizione(), prodotto.prezzo(),
+                prodotto.categoria(), prodotto.quantita());
+    }
 }

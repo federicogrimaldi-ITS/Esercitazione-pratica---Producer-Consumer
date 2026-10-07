@@ -13,7 +13,10 @@
     <p class="successo" th:if="${successMessage}" th:text="${successMessage}">Prodotto creato.</p>
 
     <article class="scheda">
-        <h1 th:text="${prodotto.nome}">Laptop Pro 15</h1>
+        <div class="intestazione">
+            <h1 th:text="${prodotto.nome}">Laptop Pro 15</h1>
+            <a class="button" th:href="@{/prodotti/{id}/modifica(id=${prodotto.id})}">Modifica</a>
+        </div>
 
         <dl>
             <dt>Categoria</dt>

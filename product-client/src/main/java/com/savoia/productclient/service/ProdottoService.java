@@ -39,4 +39,8 @@ public class ProdottoService {
     public ProdottoDTO createProduct(ProductForm productForm) {
         return prodottoApiClient.createProduct(productForm);
     }
+
+    public ProdottoDTO updateProduct(Long id, ProductForm productForm) {
+        return prodottoApiClient.updateProduct(id, productForm);
+    }
 }

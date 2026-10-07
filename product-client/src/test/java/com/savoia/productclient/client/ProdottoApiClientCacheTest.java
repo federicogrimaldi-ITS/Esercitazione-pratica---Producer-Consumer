@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.client.ExpectedCount.once;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.PUT;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withException;
@@ -100,6 +101,25 @@ class ProdottoApiClientCacheTest {
         client.trovaTutti(CriteriRicerca.nessuno());
         client.createProduct(ProdottoApiClientTest.notebookGaming());
         client.trovaTutti(CriteriRicerca.nessuno());
+
+        server.verify();
+    }
+
+    @Test
+    void updatingAProductEmptiesTheCacheSoTheDetailIsReloaded() {
+        server.expect(once(), requestTo("http://producer.test/api/products/1"))
+                .andExpect(method(GET))
+                .andRespond(withSuccess(ProdottoApiClientTest.risposta(ProdottoApiClientTest.PRODOTTO_JSON), MediaType.APPLICATION_JSON));
+        server.expect(once(), requestTo("http://producer.test/api/products/1"))
+                .andExpect(method(PUT))
+                .andRespond(withSuccess(ProdottoApiClientTest.risposta(ProdottoApiClientTest.PRODOTTO_JSON), MediaType.APPLICATION_JSON));
+        server.expect(once(), requestTo("http://producer.test/api/products/1"))
+                .andExpect(method(GET))
+                .andRespond(withSuccess(ProdottoApiClientTest.risposta(ProdottoApiClientTest.PRODOTTO_JSON), MediaType.APPLICATION_JSON));
+
+        client.trovaPerId(1L);
+        client.updateProduct(1L, ProdottoApiClientTest.notebookGaming());
+        client.trovaPerId(1L);
 
         server.verify();
     }
