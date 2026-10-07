@@ -171,3 +171,12 @@ tbody tr:hover { background: #f9fafb; }
     font-weight: normal;
     font-size: 0.9rem;
 }
+
+.azioni {
+    display: flex;
+    gap: 8px;
+}
+
+.azioni form { margin: 0; }
+
+.button-pericolo { background: var(--errore); }

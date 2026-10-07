@@ -91,7 +91,8 @@ class ProdottoWebControllerTest {
                 .andExpect(content().string(containsString("15")))
                 .andExpect(content().string(containsString("Notebook professionale con processore Intel Core i7")))
                 .andExpect(content().string(containsString("01/09/2026 09:00")))
-                .andExpect(content().string(containsString("href=\"/prodotti/1/modifica\"")));
+                .andExpect(content().string(containsString("href=\"/prodotti/1/modifica\"")))
+                .andExpect(content().string(containsString("action=\"/prodotti/1/elimina\"")));
     }
 
     @Test

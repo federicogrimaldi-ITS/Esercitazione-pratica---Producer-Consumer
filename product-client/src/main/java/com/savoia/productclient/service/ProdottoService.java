@@ -43,4 +43,8 @@ public class ProdottoService {
     public ProdottoDTO updateProduct(Long id, ProductForm productForm) {
         return prodottoApiClient.updateProduct(id, productForm);
     }
+
+    public void deleteProduct(Long id) {
+        prodottoApiClient.deleteProduct(id);
+    }
 }

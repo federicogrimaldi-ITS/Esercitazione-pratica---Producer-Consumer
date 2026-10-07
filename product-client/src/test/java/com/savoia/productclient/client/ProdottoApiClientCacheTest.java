@@ -20,6 +20,7 @@ import static org.springframework.test.web.client.ExpectedCount.once;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpMethod.PUT;
+import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withException;
@@ -120,6 +121,25 @@ class ProdottoApiClientCacheTest {
         client.trovaPerId(1L);
         client.updateProduct(1L, ProdottoApiClientTest.notebookGaming());
         client.trovaPerId(1L);
+
+        server.verify();
+    }
+
+    @Test
+    void deletingAProductEmptiesTheCacheSoTheListIsReloaded() {
+        server.expect(once(), requestTo("http://producer.test/api/products"))
+                .andExpect(method(GET))
+                .andRespond(withSuccess(ProdottoApiClientTest.risposta("[]"), MediaType.APPLICATION_JSON));
+        server.expect(once(), requestTo("http://producer.test/api/products/20"))
+                .andExpect(method(DELETE))
+                .andRespond(withStatus(HttpStatus.NO_CONTENT));
+        server.expect(once(), requestTo("http://producer.test/api/products"))
+                .andExpect(method(GET))
+                .andRespond(withSuccess(ProdottoApiClientTest.risposta("[]"), MediaType.APPLICATION_JSON));
+
+        client.trovaTutti(CriteriRicerca.nessuno());
+        client.deleteProduct(20L);
+        client.trovaTutti(CriteriRicerca.nessuno());
 
         server.verify();
     }

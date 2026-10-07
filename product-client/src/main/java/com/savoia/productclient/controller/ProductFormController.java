@@ -55,6 +55,13 @@ public class ProductFormController {
                 () -> prodottoService.updateProduct(id, productForm), "Prodotto aggiornato.");
     }
 
+    @PostMapping("/prodotti/{id}/elimina")
+    public String deleteProduct(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        prodottoService.deleteProduct(id);
+        redirectAttributes.addFlashAttribute("successMessage", "Prodotto eliminato.");
+        return "redirect:/prodotti";
+    }
+
     private String save(ProductForm productForm, BindingResult bindingResult, Model model,
                         RedirectAttributes redirectAttributes, String title, String action,
                         Supplier<ProdottoDTO> producerCall, String successMessage) {
