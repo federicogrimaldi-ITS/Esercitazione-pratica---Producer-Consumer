@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="|${prodotto.nome} - Catalogo prodotti|">Dettaglio prodotto - Catalogo prodotti</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<main class="container">
+    <a th:href="@{/prodotti}">&larr; Torna ai prodotti</a>
+
+    <article class="scheda">
+        <h1 th:text="${prodotto.nome}">Laptop Pro 15</h1>
+
+        <dl>
+            <dt>Categoria</dt>
+            <dd th:text="${prodotto.categoriaLeggibile}">Informatica</dd>
+
+            <dt>Prezzo</dt>
+            <dd th:text="|€ ${#numbers.formatDecimal(prodotto.prezzo, 1, 'POINT', 2, 'COMMA')}|">€ 1.299,90</dd>
+
+            <dt>Quantità disponibile</dt>
+            <dd th:text="${prodotto.quantita}">15</dd>
+
+            <dt>Data di creazione</dt>
+            <dd th:text="${prodotto.dataCreazione != null} ? ${#temporals.format(prodotto.dataCreazione, 'dd/MM/yyyy HH:mm')} : '-'">01/09/2026 09:00</dd>
+        </dl>
+
+        <h2>Descrizione</h2>
+        <p th:text="${prodotto.descrizione != null} ? ${prodotto.descrizione} : 'Nessuna descrizione disponibile.'">
+            Notebook professionale con processore Intel Core i7, 16 GB di RAM e SSD da 512 GB.
+        </p>
+    </article>
+</main>
+</body>
+</html>

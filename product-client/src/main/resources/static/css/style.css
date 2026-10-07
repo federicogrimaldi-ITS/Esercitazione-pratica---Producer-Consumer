@@ -1,0 +1,124 @@
+:root {
+    --primario: #1d4ed8;
+    --testo: #1f2937;
+    --bordo: #e5e7eb;
+    --sfondo: #f9fafb;
+    --errore: #b91c1c;
+    --errore-sfondo: #fef2f2;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--testo);
+    background: var(--sfondo);
+}
+
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 16px;
+}
+
+h1 { margin-top: 0; }
+
+a { color: var(--primario); }
+
+.button {
+    display: inline-block;
+    padding: 8px 16px;
+    border: 0;
+    border-radius: 6px;
+    background: var(--primario);
+    color: #fff;
+    font: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.alert {
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--errore);
+    border-radius: 6px;
+    background: var(--errore-sfondo);
+    color: var(--errore);
+}
+
+.alert h1 { font-size: 1.25rem; margin-bottom: 8px; }
+.alert p { margin: 0; }
+
+.table-wrapper { overflow-x: auto; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border: 1px solid var(--bordo);
+    border-radius: 6px;
+}
+
+th, td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--bordo);
+}
+
+th { background: #f3f4f6; font-weight: 600; }
+
+tbody tr:hover { background: #f9fafb; }
+
+.numero { text-align: right; white-space: nowrap; }
+
+.vuoto { color: #6b7280; }
+
+.scheda {
+    margin-top: 16px;
+    padding: 24px;
+    background: #fff;
+    border: 1px solid var(--bordo);
+    border-radius: 6px;
+}
+
+.scheda h2 { font-size: 1.1rem; margin-bottom: 4px; }
+
+.scheda dl {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 8px 16px;
+    margin: 0;
+}
+
+.scheda dt { font-weight: 600; }
+.scheda dd { margin: 0; }
+
+.ricerca {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 16px;
+    background: #fff;
+    border: 1px solid var(--bordo);
+    border-radius: 6px;
+}
+
+.ricerca label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-weight: 600;
+    flex: 1 1 200px;
+}
+
+.ricerca input,
+.ricerca select {
+    padding: 8px;
+    border: 1px solid var(--bordo);
+    border-radius: 6px;
+    font: inherit;
+    font-weight: normal;
+}

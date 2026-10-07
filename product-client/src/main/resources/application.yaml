@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: product-client
+  http:
+    clients:
+      # Timeout delle chiamate HTTP verso la Producer
+      connect-timeout: 2s
+      read-timeout: 5s
+  cache:
+    # Cache locale: evita nuove chiamate HTTP finché i dati non sono scaduti
+    cache-names: prodotti,prodotto
+    caffeine:
+      spec: maximumSize=500,expireAfterWrite=60s
+
+server:
+  port: 8082
+
+# Indirizzo della Producer API (product-api)
+api:
+  base-url: http://localhost:8080/api

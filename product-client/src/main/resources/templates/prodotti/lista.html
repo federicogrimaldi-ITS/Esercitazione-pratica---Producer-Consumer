@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Prodotti - Catalogo prodotti</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<main class="container">
+    <h1>Prodotti</h1>
+
+    <form class="ricerca" th:action="@{/prodotti}" method="get">
+        <label>
+            Cerca prodotto
+            <input type="search" name="nome" th:value="${criteri.nome}" placeholder="es. laptop">
+        </label>
+        <label>
+            Categoria
+            <select name="categoria">
+                <option value="" th:selected="${criteri.categoria == null}">Tutte</option>
+                <option th:each="c : ${categorie}" th:value="${c.codice}" th:text="${c.etichetta}"
+                        th:selected="${c.codice == criteri.categoria}">Informatica</option>
+            </select>
+        </label>
+        <button class="button" type="submit">Cerca</button>
+        <a th:unless="${criteri.vuoto}" th:href="@{/prodotti}">Azzera filtri</a>
+    </form>
+
+    <p th:if="${#lists.isEmpty(prodotti)}" class="vuoto">Nessun prodotto trovato.</p>
+
+    <div class="table-wrapper" th:unless="${#lists.isEmpty(prodotti)}">
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Categoria</th>
+                <th class="numero">Prezzo</th>
+                <th class="numero">Quantità</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${prodotti}">
+                <td th:text="${p.id}">1</td>
+                <td><a th:href="@{/prodotti/{id}(id=${p.id})}" th:text="${p.nome}">Laptop Pro 15</a></td>
+                <td th:text="${p.categoriaLeggibile}">Informatica</td>
+                <td class="numero"
+                    th:text="|€ ${#numbers.formatDecimal(p.prezzo, 1, 'POINT', 2, 'COMMA')}|">€ 1.299,90</td>
+                <td class="numero" th:text="${p.quantita}">15</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>
