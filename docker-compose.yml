@@ -7,6 +7,8 @@ services:
       - .env
     volumes:
       - mysql-data:/var/lib/mysql
+      # Executed only when mysql-data is initialized for the first time.
+      - ./initDb.sql:/docker-entrypoint-initdb.d/01-initDb.sql:ro
     healthcheck:
       test:
         [
