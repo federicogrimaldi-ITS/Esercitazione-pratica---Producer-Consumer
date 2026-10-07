@@ -5,11 +5,15 @@ package com.savoia.productclient.model;
  * I valori vuoti o composti solo da spazi sono considerati assenti;
  * la categoria è espressa con il valore dell'enum della Producer (es. {@code Informatica}).
  */
-public record CriteriRicerca(String nome, String categoria) {
+public record CriteriRicerca(String nome, String categoria, PriceSort priceSort) {
 
     public CriteriRicerca {
         nome = normalizza(nome);
         categoria = normalizza(categoria);
+    }
+
+    public CriteriRicerca(String nome, String categoria) {
+        this(nome, categoria, null);
     }
 
     public static CriteriRicerca nessuno() {
