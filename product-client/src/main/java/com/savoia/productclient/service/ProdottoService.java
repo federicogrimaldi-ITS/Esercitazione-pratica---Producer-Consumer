@@ -1,6 +1,7 @@
 package com.savoia.productclient.service;
 
 import com.savoia.productclient.client.ProdottoApiClient;
+import com.savoia.productclient.config.ApiProperties;
 import com.savoia.productclient.model.Categoria;
 import com.savoia.productclient.model.CriteriRicerca;
 import com.savoia.productclient.model.ProdottoDTO;
@@ -17,7 +18,7 @@ public class ProdottoService {
 
     private final ProdottoApiClient prodottoApiClient;
 
-    public ProdottoService(ProdottoApiClient prodottoApiClient) {
+    public ProdottoService(ProdottoApiClient prodottoApiClient, ApiProperties apiProperties) {
         this.prodottoApiClient = prodottoApiClient;
     }
 

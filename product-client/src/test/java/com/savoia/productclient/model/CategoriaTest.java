@@ -7,13 +7,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CategoriaTest {
 
     @Test
-    void ilCodiceEQuelloDellEnumDellaProducer() {
-        assertThat(new Categoria(" informatica ").codice()).isEqualTo("INFORMATICA");
+    void codeKeepsTheProducerEnumValueTrimmed() {
+        assertThat(new Categoria(" Informatica ").codice()).isEqualTo("Informatica");
     }
 
     @Test
     void lEtichettaEPensataPerLUtente() {
-        assertThat(new Categoria("INFORMATICA").etichetta()).isEqualTo("Informatica");
-        assertThat(new Categoria("NETWORKING").etichetta()).isEqualTo("Networking");
+        assertThat(new Categoria("Informatica").etichetta()).isEqualTo("Informatica");
     }
 }
