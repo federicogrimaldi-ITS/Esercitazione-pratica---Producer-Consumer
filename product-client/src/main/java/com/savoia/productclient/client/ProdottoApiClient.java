@@ -121,6 +121,10 @@ public class ProdottoApiClient {
                 .body(PRODOTTO)));
     }
 
+    public ProdottoDTO updateProduct(Long id, ProductForm productForm) {
+        throw new UnsupportedOperationException();
+    }
+
     private void authenticate(HttpHeaders headers) {
         headers.setBasicAuth(apiProperties.username(), apiProperties.password());
     }

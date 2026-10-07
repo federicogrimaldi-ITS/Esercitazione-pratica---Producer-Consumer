@@ -1,6 +1,7 @@
 package com.savoia.productclient.controller;
 
 import com.savoia.productclient.exception.InvalidProductException;
+import com.savoia.productclient.exception.ProdottoNonTrovatoException;
 import com.savoia.productclient.model.Categoria;
 import com.savoia.productclient.model.ProdottoDTO;
 import com.savoia.productclient.model.ProductForm;
@@ -96,5 +97,58 @@ class ProductFormControllerTest {
 
         verify(prodottoService, atLeastOnce()).categorie();
         verifyNoMoreInteractions(prodottoService);
+    }
+
+    static final ProdottoDTO LAPTOP = new ProdottoDTO(1L, "Laptop Pro 15", "Notebook professionale",
+            new BigDecimal("1299.90"), "Informatica", 15, null);
+
+    @Test
+    void editPageShowsTheFormFilledWithTheCurrentProduct() throws Exception {
+        when(prodottoService.trovaProdotto(1L)).thenReturn(LAPTOP);
+
+        mvc.perform(get("/prodotti/1/modifica"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("prodotti/form"))
+                .andExpect(content().string(containsString("Modifica prodotto")))
+                .andExpect(content().string(containsString("action=\"/prodotti/1\"")))
+                .andExpect(content().string(containsString("value=\"Laptop Pro 15\"")))
+                .andExpect(content().string(containsString("value=\"1299.90\"")))
+                .andExpect(content().string(containsString("<option value=\"Informatica\" selected=\"selected\">")));
+    }
+
+    @Test
+    void editPageOfAMissingProductShowsNotFound() throws Exception {
+        when(prodottoService.trovaProdotto(9999L)).thenThrow(new ProdottoNonTrovatoException("Product not found with Id: 9999"));
+
+        mvc.perform(get("/prodotti/9999/modifica"))
+                .andExpect(status().isNotFound())
+                .andExpect(view().name("errore"));
+    }
+
+    @Test
+    void validChangesAreSavedAndTheUserIsRedirectedToTheDetail() throws Exception {
+        when(prodottoService.updateProduct(1L, NOTEBOOK)).thenReturn(LAPTOP);
+
+        mvc.perform(post("/prodotti/1")
+                        .param("name", "Notebook Gaming")
+                        .param("description", "Notebook ad alte prestazioni")
+                        .param("price", "1599.90")
+                        .param("category", "Informatica")
+                        .param("quantity", "8"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/prodotti/1"))
+                .andExpect(flash().attribute("successMessage", "Prodotto aggiornato."));
+    }
+
+    @Test
+    void invalidChangesShowTheEditFormAgain() throws Exception {
+        when(prodottoService.updateProduct(any(), any())).thenThrow(new InvalidProductException(
+                "Some fields are invalid.", Map.of("price", "Price cannot be negative")));
+
+        mvc.perform(post("/prodotti/1").param("name", "Laptop").param("price", "-1").param("category", "Informatica"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Modifica prodotto")))
+                .andExpect(content().string(containsString("action=\"/prodotti/1\"")))
+                .andExpect(content().string(containsString("Price cannot be negative")));
     }
 }
