@@ -41,6 +41,6 @@ public class ProdottoService {
     }
 
     public ProdottoDTO updateProduct(Long id, ProductForm productForm) {
-        throw new UnsupportedOperationException();
+        return prodottoApiClient.updateProduct(id, productForm);
     }
 }

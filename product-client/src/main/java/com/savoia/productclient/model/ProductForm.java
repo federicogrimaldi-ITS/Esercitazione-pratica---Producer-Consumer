@@ -18,6 +18,7 @@ public class ProductForm {
     private Integer quantity;
 
     public static ProductForm from(ProdottoDTO prodotto) {
-        throw new UnsupportedOperationException();
+        return new ProductForm(prodotto.nome(), prodotto.descrizione(), prodotto.prezzo(),
+                prodotto.categoria(), prodotto.quantita());
     }
 }

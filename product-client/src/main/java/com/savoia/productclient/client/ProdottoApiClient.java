@@ -121,8 +121,16 @@ public class ProdottoApiClient {
                 .body(PRODOTTO)));
     }
 
+    /** {@code PUT /products/{id}}, autenticata con le credenziali di servizio della Producer. */
+    @CacheEvict(cacheNames = {CacheConfig.CACHE_PRODOTTI, CacheConfig.CACHE_PRODOTTO}, allEntries = true)
     public ProdottoDTO updateProduct(Long id, ProductForm productForm) {
-        throw new UnsupportedOperationException();
+        return dati(esegui(() -> restClient.put()
+                .uri("/products/{id}", id)
+                .headers(this::authenticate)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(productForm)
+                .retrieve()
+                .body(PRODOTTO)));
     }
 
     private void authenticate(HttpHeaders headers) {
