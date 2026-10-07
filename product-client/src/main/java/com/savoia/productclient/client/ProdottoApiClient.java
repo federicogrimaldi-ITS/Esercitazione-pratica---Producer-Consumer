@@ -18,6 +18,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Supplier;
 
 /**
@@ -47,9 +48,9 @@ public class ProdottoApiClient {
      * <ul>
      *   <li>nessun filtro: {@code GET /products}</li>
      *   <li>solo nome: {@code GET /products/search?name=...}</li>
-     *   <li>categoria (con o senza nome): {@code GET /products/category/{CATEGORIA}};
+     *   <li>categoria (con o senza nome): {@code GET /products/category/{categoria}};
      *       il nome, se presente, viene applicato qui con lo stesso criterio della Producer
-     *       (uguaglianza senza distinzione tra maiuscole e minuscole)</li>
+     *       (il nome contiene il testo, senza distinzione tra maiuscole e minuscole)</li>
      * </ul>
      */
     @Cacheable(CacheConfig.CACHE_PRODOTTI)
@@ -60,7 +61,7 @@ public class ProdottoApiClient {
                 return perCategoria;
             }
             return perCategoria.stream()
-                    .filter(p -> criteri.nome().equalsIgnoreCase(p.nome()))
+                    .filter(p -> containsIgnoringCase(p.nome(), criteri.nome()))
                     .toList();
         }
         if (criteri.nome() != null) {
@@ -79,6 +80,10 @@ public class ProdottoApiClient {
                 .uri("/products/{id}", id)
                 .retrieve()
                 .body(PRODOTTO)));
+    }
+
+    private static boolean containsIgnoringCase(String text, String part) {
+        return text != null && text.toLowerCase(Locale.ROOT).contains(part.toLowerCase(Locale.ROOT));
     }
 
     private List<ProdottoDTO> lista(String uri, Object... variabili) {
