@@ -16,14 +16,14 @@ server:
   port: 8082
   servlet:
     session:
-      # I messaggi flash usano la sessione: niente ;jsessionid negli URL dei redirect
+      # Flash messages use the session: keep ;jsessionid out of redirect URLs
       tracking-modes: cookie
 
 # Indirizzo della Producer API (product-api)
 api:
   base-url: http://localhost:8081/api
-  # Valori dell'enum Category della Producer (non esiste un endpoint che li restituisca)
+  # Values of the Producer Category enum (the Producer has no endpoint listing them)
   categories: Accessori,Audio,Informatica,Mobile,Networking,Storage,Ufficio,Wearable
-  # Credenziali HTTP Basic della Producer, richieste per creare, modificare ed eliminare prodotti
+  # Producer HTTP Basic credentials, required to create, update and delete products
   username: ${API_USERNAME:}
   password: ${API_PASSWORD:}

@@ -109,7 +109,6 @@ public class ProdottoApiClient {
                 .toList();
     }
 
-    /** {@code POST /products}, autenticata con le credenziali di servizio della Producer. */
     @CacheEvict(cacheNames = {CacheConfig.CACHE_PRODOTTI, CacheConfig.CACHE_PRODOTTO}, allEntries = true)
     public ProdottoDTO createProduct(ProductForm productForm) {
         return dati(esegui(() -> restClient.post()
@@ -121,7 +120,6 @@ public class ProdottoApiClient {
                 .body(PRODOTTO)));
     }
 
-    /** {@code PUT /products/{id}}, autenticata con le credenziali di servizio della Producer. */
     @CacheEvict(cacheNames = {CacheConfig.CACHE_PRODOTTI, CacheConfig.CACHE_PRODOTTO}, allEntries = true)
     public ProdottoDTO updateProduct(Long id, ProductForm productForm) {
         return dati(esegui(() -> restClient.put()
@@ -133,7 +131,6 @@ public class ProdottoApiClient {
                 .body(PRODOTTO)));
     }
 
-    /** {@code DELETE /products/{id}}, autenticata con le credenziali di servizio della Producer. */
     @CacheEvict(cacheNames = {CacheConfig.CACHE_PRODOTTI, CacheConfig.CACHE_PRODOTTO}, allEntries = true)
     public void deleteProduct(Long id) {
         esegui(() -> restClient.delete()
