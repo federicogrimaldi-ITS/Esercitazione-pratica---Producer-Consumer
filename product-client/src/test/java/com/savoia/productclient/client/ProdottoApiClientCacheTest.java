@@ -8,6 +8,7 @@ import org.springframework.boot.restclient.test.autoconfigure.AutoConfigureMockR
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 
@@ -16,8 +17,12 @@ import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.client.ExpectedCount.once;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withException;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @SpringBootTest(properties = "api.base-url=http://producer.test/api")
@@ -77,5 +82,25 @@ class ProdottoApiClientCacheTest {
     void laCacheEInMemoriaConCaffeine() {
         assertThat(cacheManager).isInstanceOf(CaffeineCacheManager.class);
         assertThat(cacheManager.getCacheNames()).containsExactlyInAnyOrder("prodotti", "prodotto");
+    }
+
+    @Test
+    void creatingAProductEmptiesTheCacheSoTheListIsReloaded() {
+        server.expect(once(), requestTo("http://producer.test/api/products"))
+                .andExpect(method(GET))
+                .andRespond(withSuccess(ProdottoApiClientTest.risposta("[]"), MediaType.APPLICATION_JSON));
+        server.expect(once(), requestTo("http://producer.test/api/products"))
+                .andExpect(method(POST))
+                .andRespond(withStatus(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
+                        .body(ProdottoApiClientTest.risposta(ProdottoApiClientTest.PRODOTTO_JSON)));
+        server.expect(once(), requestTo("http://producer.test/api/products"))
+                .andExpect(method(GET))
+                .andRespond(withSuccess(ProdottoApiClientTest.risposta("[]"), MediaType.APPLICATION_JSON));
+
+        client.trovaTutti(CriteriRicerca.nessuno());
+        client.createProduct(ProdottoApiClientTest.notebookGaming());
+        client.trovaTutti(CriteriRicerca.nessuno());
+
+        server.verify();
     }
 }

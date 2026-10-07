@@ -20,3 +20,6 @@ api:
   base-url: http://localhost:8081/api
   # Valori dell'enum Category della Producer (non esiste un endpoint che li restituisca)
   categories: Accessori,Audio,Informatica,Mobile,Networking,Storage,Ufficio,Wearable
+  # Credenziali HTTP Basic della Producer, richieste per creare, modificare ed eliminare prodotti
+  username: ${API_USERNAME:}
+  password: ${API_PASSWORD:}

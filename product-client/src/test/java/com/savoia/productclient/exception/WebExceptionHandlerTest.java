@@ -31,6 +31,11 @@ class WebExceptionHandlerTest {
             throw new ProdottoNonTrovatoException("Prodotto non trovato");
         }
 
+        @GetMapping("/credenziali")
+        String credenziali() {
+            throw new ApiAuthenticationException(401);
+        }
+
         @GetMapping("/errore-api")
         String erroreApi() {
             throw new ApiErroreException(500, "Errore interno");
@@ -63,5 +68,14 @@ class WebExceptionHandlerTest {
                 .andExpect(status().isBadGateway())
                 .andExpect(view().name("errore"))
                 .andExpect(content().string(containsString("Errore interno")));
+    }
+
+    @Test
+    void rejectedApiCredentialsExplainHowToConfigureThem() throws Exception {
+        mvc.perform(get("/credenziali"))
+                .andExpect(status().isBadGateway())
+                .andExpect(view().name("errore"))
+                .andExpect(content().string(containsString("Operazione non autorizzata")))
+                .andExpect(content().string(containsString("API_USERNAME")));
     }
 }
