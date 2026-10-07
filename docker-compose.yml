@@ -19,7 +19,7 @@ services:
       timeout: 5s
       retries: 20
 
-  backend:
+  backend:  
     build:
       context: ./product-api
       dockerfile: Dockerfile
@@ -32,6 +32,22 @@ services:
         condition: service_healthy
     ports:
       - "8081:8081"
+
+  frontend:
+      build:
+        context: ./product-client
+        dockerfile: Dockerfile
+      container_name: esercitazione-frontend
+      restart: unless-stopped
+      environment:
+        API_BASE_URL: http://backend:8081/api
+        API_USERNAME: ${API_USERNAME:?Set API_USERNAME in the .env file}
+        API_PASSWORD: ${API_PASSWORD:?Set API_PASSWORD in the .env file}
+      depends_on:
+        backend:
+          condition: service_started
+      ports:
+        - "8082:8082"
 
 volumes:
   mysql-data:
