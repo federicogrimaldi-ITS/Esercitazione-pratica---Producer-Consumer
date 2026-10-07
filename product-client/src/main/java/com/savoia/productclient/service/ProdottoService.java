@@ -37,6 +37,6 @@ public class ProdottoService {
     }
 
     public ProdottoDTO createProduct(ProductForm productForm) {
-        throw new UnsupportedOperationException();
+        return prodottoApiClient.createProduct(productForm);
     }
 }

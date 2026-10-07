@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="|${formTitle} - Catalogo prodotti|">Nuovo prodotto - Catalogo prodotti</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<main class="container">
+    <a th:href="@{/prodotti}">&larr; Torna ai prodotti</a>
+
+    <form class="scheda modulo" th:action="@{${formAction}}" th:object="${productForm}" method="post">
+        <h1 th:text="${formTitle}">Nuovo prodotto</h1>
+
+        <div class="alert" th:if="${#fields.hasGlobalErrors()}">
+            <p th:each="error : ${#fields.globalErrors()}" th:text="${error}">Some fields are invalid.</p>
+        </div>
+
+        <label>
+            Nome
+            <input type="text" th:field="*{name}" maxlength="200" required>
+            <span class="errore-campo" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Name is required</span>
+        </label>
+
+        <label>
+            Descrizione
+            <textarea th:field="*{description}" rows="4"></textarea>
+            <span class="errore-campo" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></span>
+        </label>
+
+        <label>
+            Prezzo (€)
+            <input type="text" inputmode="decimal" th:field="*{price}" required>
+            <span class="errore-campo" th:if="${#fields.hasErrors('price')}" th:errors="*{price}">Valore non valido</span>
+        </label>
+
+        <label>
+            Categoria
+            <select th:field="*{category}" required>
+                <option value="">Seleziona…</option>
+                <option th:each="c : ${categories}" th:value="${c.codice}" th:text="${c.etichetta}">Informatica</option>
+            </select>
+            <span class="errore-campo" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></span>
+        </label>
+
+        <label>
+            Quantità
+            <input type="number" min="0" th:field="*{quantity}">
+            <span class="errore-campo" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}"></span>
+        </label>
+
+        <button class="button" type="submit">Salva</button>
+    </form>
+</main>
+</body>
+</html>

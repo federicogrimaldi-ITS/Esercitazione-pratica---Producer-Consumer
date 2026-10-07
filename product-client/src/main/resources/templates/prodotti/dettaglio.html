@@ -10,6 +10,8 @@
 <main class="container">
     <a th:href="@{/prodotti}">&larr; Torna ai prodotti</a>
 
+    <p class="successo" th:if="${successMessage}" th:text="${successMessage}">Prodotto creato.</p>
+
     <article class="scheda">
         <h1 th:text="${prodotto.nome}">Laptop Pro 15</h1>
 

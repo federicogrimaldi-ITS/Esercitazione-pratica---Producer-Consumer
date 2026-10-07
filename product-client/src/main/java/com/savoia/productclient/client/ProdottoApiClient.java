@@ -2,7 +2,9 @@ package com.savoia.productclient.client;
 
 import com.savoia.productclient.config.ApiProperties;
 import com.savoia.productclient.config.CacheConfig;
+import com.savoia.productclient.exception.ApiAuthenticationException;
 import com.savoia.productclient.exception.ApiErroreException;
+import com.savoia.productclient.exception.InvalidProductException;
 import com.savoia.productclient.exception.ApiNonDisponibileException;
 import com.savoia.productclient.exception.ProdottoNonTrovatoException;
 import com.savoia.productclient.model.CriteriRicerca;
@@ -10,9 +12,12 @@ import com.savoia.productclient.model.PriceSort;
 import com.savoia.productclient.model.ProductForm;
 import com.savoia.productclient.model.ProdottoDTO;
 import com.savoia.productclient.model.RispostaApi;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
@@ -41,9 +46,11 @@ public class ProdottoApiClient {
             };
 
     private final RestClient restClient;
+    private final ApiProperties apiProperties;
 
     public ProdottoApiClient(RestClient.Builder builder, ApiProperties apiProperties) {
         this.restClient = builder.baseUrl(apiProperties.baseUrl()).build();
+        this.apiProperties = apiProperties;
     }
 
     /**
@@ -102,8 +109,20 @@ public class ProdottoApiClient {
                 .toList();
     }
 
+    /** {@code POST /products}, autenticata con le credenziali di servizio della Producer. */
+    @CacheEvict(cacheNames = {CacheConfig.CACHE_PRODOTTI, CacheConfig.CACHE_PRODOTTO}, allEntries = true)
     public ProdottoDTO createProduct(ProductForm productForm) {
-        throw new UnsupportedOperationException();
+        return dati(esegui(() -> restClient.post()
+                .uri("/products")
+                .headers(this::authenticate)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(productForm)
+                .retrieve()
+                .body(PRODOTTO)));
+    }
+
+    private void authenticate(HttpHeaders headers) {
+        headers.setBasicAuth(apiProperties.username(), apiProperties.password());
     }
 
     /** {@code GET /products/{id}}. */
@@ -135,25 +154,33 @@ public class ProdottoApiClient {
         try {
             return chiamata.get();
         } catch (RestClientResponseException ex) {
-            String messaggio = messaggioDiErrore(ex);
-            if (ex.getStatusCode().value() == HttpStatus.NOT_FOUND.value()) {
-                throw new ProdottoNonTrovatoException(messaggio);
-            }
-            throw new ApiErroreException(ex.getStatusCode().value(), messaggio);
+            throw traduciErrore(ex);
         } catch (ResourceAccessException ex) {
             throw new ApiNonDisponibileException(ex);
         }
     }
 
-    private String messaggioDiErrore(RestClientResponseException ex) {
-        try {
-            RispostaApi<?> errore = ex.getResponseBodyAs(RispostaApi.class);
-            if (errore != null && errore.message() != null) {
-                return errore.message();
-            }
-        } catch (RestClientException | IllegalStateException ignored) {
-            // corpo assente o non in formato JSON: si usa il messaggio generico
+    private static RuntimeException traduciErrore(RestClientResponseException ex) {
+        int status = ex.getStatusCode().value();
+        if (status == HttpStatus.UNAUTHORIZED.value() || status == HttpStatus.FORBIDDEN.value()) {
+            return new ApiAuthenticationException(status);
         }
-        return ex.getStatusText();
+        RispostaApi<?> errorBody = readErrorBody(ex);
+        String messaggio = errorBody != null && errorBody.message() != null ? errorBody.message() : ex.getStatusText();
+        if (status == HttpStatus.NOT_FOUND.value()) {
+            return new ProdottoNonTrovatoException(messaggio);
+        }
+        if (status == HttpStatus.BAD_REQUEST.value() && errorBody != null && errorBody.errors() != null) {
+            return new InvalidProductException(messaggio, errorBody.errors());
+        }
+        return new ApiErroreException(status, messaggio);
+    }
+
+    private static RispostaApi<?> readErrorBody(RestClientResponseException ex) {
+        try {
+            return ex.getResponseBodyAs(RispostaApi.class);
+        } catch (RestClientException | IllegalStateException notJson) {
+            return null;
+        }
     }
 }

@@ -23,6 +23,13 @@ public class WebExceptionHandler {
         return paginaErrore(HttpStatus.NOT_FOUND, "Prodotto non trovato", ex.getMessage());
     }
 
+    @ExceptionHandler(ApiAuthenticationException.class)
+    public ModelAndView apiAuthenticationFailed(ApiAuthenticationException ex) {
+        return paginaErrore(HttpStatus.BAD_GATEWAY,
+                "Operazione non autorizzata",
+                "La Producer ha rifiutato le credenziali: controllare API_USERNAME e API_PASSWORD del Consumer.");
+    }
+
     @ExceptionHandler(ApiErroreException.class)
     public ModelAndView erroreApi(ApiErroreException ex) {
         return paginaErrore(HttpStatus.BAD_GATEWAY,

@@ -8,7 +8,12 @@
 </head>
 <body>
 <main class="container">
-    <h1>Prodotti</h1>
+    <div class="intestazione">
+        <h1>Prodotti</h1>
+        <a class="button" th:href="@{/prodotti/nuovo}">Nuovo prodotto</a>
+    </div>
+
+    <p class="successo" th:if="${successMessage}" th:text="${successMessage}">Prodotto eliminato.</p>
 
     <form class="ricerca" th:action="@{/prodotti}" method="get">
         <label>

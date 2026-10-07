@@ -122,3 +122,52 @@ tbody tr:hover { background: #f9fafb; }
     font: inherit;
     font-weight: normal;
 }
+
+.intestazione {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.intestazione h1 { margin: 0; }
+
+.successo {
+    padding: 12px 16px;
+    border: 1px solid #15803d;
+    border-radius: 6px;
+    background: #f0fdf4;
+    color: #15803d;
+}
+
+.modulo {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.modulo label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-weight: 600;
+}
+
+.modulo input,
+.modulo select,
+.modulo textarea {
+    padding: 8px;
+    border: 1px solid var(--bordo);
+    border-radius: 6px;
+    font: inherit;
+    font-weight: normal;
+}
+
+.modulo .button { align-self: flex-start; }
+
+.errore-campo {
+    color: var(--errore);
+    font-weight: normal;
+    font-size: 0.9rem;
+}
