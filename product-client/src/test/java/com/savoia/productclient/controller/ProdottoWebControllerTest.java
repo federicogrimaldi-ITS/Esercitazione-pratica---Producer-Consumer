@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -30,7 +29,7 @@ class ProdottoWebControllerTest {
 
     static final ProdottoDTO LAPTOP = new ProdottoDTO(1L, "Laptop Pro 15",
             "Notebook professionale con processore Intel Core i7, 16 GB di RAM e SSD da 512 GB.",
-            new BigDecimal("1299.90"), "INFORMATICA", 15, LocalDateTime.of(2026, 9, 1, 9, 0));
+            new BigDecimal("1299.90"), "Informatica", 15, LocalDateTime.of(2026, 9, 1, 9, 0));
 
     @Autowired
     MockMvc mvc;
@@ -55,8 +54,7 @@ class ProdottoWebControllerTest {
                 .andExpect(content().string(containsString("<table")))
                 .andExpect(content().string(containsString("Laptop Pro 15")))
                 .andExpect(content().string(containsString("<td>Informatica</td>")))
-                .andExpect(content().string(not(containsString("INFORMATICA"))))
-                .andExpect(content().string(containsString("€ 1.299,90")))
+                                .andExpect(content().string(containsString("€ 1.299,90")))
                 .andExpect(content().string(containsString("href=\"/prodotti/1\"")));
     }
 
@@ -112,15 +110,15 @@ class ProdottoWebControllerTest {
 
     @Test
     void ricercaInoltraNomeECategoriaEMantieneIValoriNelForm() throws Exception {
-        when(prodottoService.cercaProdotti(new CriteriRicerca("laptop", "INFORMATICA"))).thenReturn(List.of(LAPTOP));
-        when(prodottoService.categorie()).thenReturn(List.of(new Categoria("ACCESSORI"), new Categoria("INFORMATICA")));
+        when(prodottoService.cercaProdotti(new CriteriRicerca("laptop", "Informatica"))).thenReturn(List.of(LAPTOP));
+        when(prodottoService.categorie()).thenReturn(List.of(new Categoria("Accessori"), new Categoria("Informatica")));
 
-        mvc.perform(get("/prodotti").param("nome", "laptop").param("categoria", "INFORMATICA"))
+        mvc.perform(get("/prodotti").param("nome", "laptop").param("categoria", "Informatica"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Laptop Pro 15")))
                 .andExpect(content().string(containsString("name=\"nome\" value=\"laptop\"")))
-                .andExpect(content().string(containsString("<option value=\"INFORMATICA\" selected=\"selected\">Informatica</option>")))
-                .andExpect(content().string(containsString("<option value=\"ACCESSORI\">Accessori</option>")));
+                .andExpect(content().string(containsString("<option value=\"Informatica\" selected=\"selected\">Informatica</option>")))
+                .andExpect(content().string(containsString("<option value=\"Accessori\">Accessori</option>")));
     }
 
     @Test

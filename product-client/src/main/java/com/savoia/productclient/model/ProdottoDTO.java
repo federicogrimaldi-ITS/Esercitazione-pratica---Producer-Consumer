@@ -16,7 +16,7 @@ public record ProdottoDTO(
         @JsonProperty("price") BigDecimal prezzo,
         @JsonProperty("category") String categoria,
         @JsonProperty("quantity") Integer quantita,
-        LocalDateTime dataCreazione) {
+        @JsonProperty("creationDate") LocalDateTime dataCreazione) {
 
     public String categoriaLeggibile() {
         return new Categoria(categoria).etichetta();

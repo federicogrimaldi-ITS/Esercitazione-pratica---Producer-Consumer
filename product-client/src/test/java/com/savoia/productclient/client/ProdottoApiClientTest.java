@@ -42,9 +42,9 @@ class ProdottoApiClientTest {
                 "name": "Laptop Pro 15",
                 "description": "Notebook professionale",
                 "price": 1299.90,
-                "category": "INFORMATICA",
+                "category": "Informatica",
                 "quantity": 15,
-                "dataCreazione": "2026-09-01T09:00:00"
+                "creationDate": "2026-09-01T09:00:00"
             }
             """;
 
@@ -91,26 +91,26 @@ class ProdottoApiClientTest {
 
     @Test
     void filtroPerCategoriaUsaLEndpointCategory() {
-        server.expect(requestTo("http://producer.test/api/products/category/INFORMATICA"))
+        server.expect(requestTo("http://producer.test/api/products/category/Informatica"))
                 .andRespond(withSuccess(risposta("[" + PRODOTTO_JSON + "]"), MediaType.APPLICATION_JSON));
 
-        List<ProdottoDTO> prodotti = client.trovaTutti(new CriteriRicerca(null, "informatica"));
+        List<ProdottoDTO> prodotti = client.trovaTutti(new CriteriRicerca(null, "Informatica"));
 
         assertThat(prodotti).hasSize(1);
         server.verify();
     }
 
     @Test
-    void nomeECategoriaInsiemeFiltranoPerNomeIProdottiDellaCategoria() {
-        server.expect(requestTo("http://producer.test/api/products/category/INFORMATICA"))
+    void nameAndCategoryKeepCategoryProductsWhoseNameContainsTheText() {
+        server.expect(requestTo("http://producer.test/api/products/category/Informatica"))
                 .andRespond(withSuccess(risposta("""
                         [
-                          {"id": 1, "name": "Laptop Pro 15", "price": 1299.90, "category": "INFORMATICA", "quantity": 15},
-                          {"id": 3, "name": "Monitor 27 4K", "price": 449.90, "category": "INFORMATICA", "quantity": 12}
+                          {"id": 1, "name": "Laptop Pro 15", "price": 1299.90, "category": "Informatica", "quantity": 15},
+                          {"id": 3, "name": "Monitor 27 4K", "price": 449.90, "category": "Informatica", "quantity": 12}
                         ]
                         """), MediaType.APPLICATION_JSON));
 
-        List<ProdottoDTO> prodotti = client.trovaTutti(new CriteriRicerca("monitor 27 4k", "INFORMATICA"));
+        List<ProdottoDTO> prodotti = client.trovaTutti(new CriteriRicerca("monitor", "Informatica"));
 
         assertThat(prodotti).extracting(ProdottoDTO::id).containsExactly(3L);
         server.verify();
@@ -128,7 +128,7 @@ class ProdottoApiClientTest {
                 "Laptop Pro 15",
                 "Notebook professionale",
                 new BigDecimal("1299.90"),
-                "INFORMATICA",
+                "Informatica",
                 15,
                 LocalDateTime.of(2026, 9, 1, 9, 0)));
     }

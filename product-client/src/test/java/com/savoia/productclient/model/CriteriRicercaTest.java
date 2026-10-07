@@ -20,13 +20,13 @@ class CriteriRicercaTest {
         CriteriRicerca criteri = new CriteriRicerca("  laptop ", " Informatica ");
 
         assertThat(criteri.nome()).isEqualTo("laptop");
-        assertThat(criteri.categoria()).isEqualTo("INFORMATICA");
+        assertThat(criteri.categoria()).isEqualTo("Informatica");
         assertThat(criteri.isVuoto()).isFalse();
     }
 
     @Test
-    void laCategoriaVieneConvertitaNelCodiceDellEnumDellaProducer() {
-        assertThat(new CriteriRicerca(null, "informatica").categoria()).isEqualTo("INFORMATICA");
+    void categoryIsSentExactlyAsTheProducerEnumValue() {
+        assertThat(new CriteriRicerca(null, "Informatica").categoria()).isEqualTo("Informatica");
     }
 
     @Test
