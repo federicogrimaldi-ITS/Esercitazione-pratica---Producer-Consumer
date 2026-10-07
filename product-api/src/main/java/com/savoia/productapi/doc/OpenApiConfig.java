@@ -25,7 +25,7 @@ public class OpenApiConfig {
     public OpenAPI defineOpenApi() {
 
         Server serverDev = new Server();
-        serverDev.setUrl("http://localhost:8080/api");
+        serverDev.setUrl("http://localhost:8081/api");
         serverDev.setDescription("Development");
 
         Info info = new Info()
