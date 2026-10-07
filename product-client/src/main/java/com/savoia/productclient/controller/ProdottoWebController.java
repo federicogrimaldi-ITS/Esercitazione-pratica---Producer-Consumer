@@ -1,6 +1,7 @@
 package com.savoia.productclient.controller;
 
 import com.savoia.productclient.model.CriteriRicerca;
+import com.savoia.productclient.model.PriceSort;
 import com.savoia.productclient.service.ProdottoService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,8 +26,9 @@ public class ProdottoWebController {
     @GetMapping("/prodotti")
     public String lista(@RequestParam(required = false) String nome,
                         @RequestParam(required = false) String categoria,
+                        @RequestParam(required = false) PriceSort priceSort,
                         Model model) {
-        CriteriRicerca criteri = new CriteriRicerca(nome, categoria);
+        CriteriRicerca criteri = new CriteriRicerca(nome, categoria, priceSort);
         model.addAttribute("prodotti", prodottoService.cercaProdotti(criteri));
         model.addAttribute("categorie", prodottoService.categorie());
         model.addAttribute("criteri", criteri);

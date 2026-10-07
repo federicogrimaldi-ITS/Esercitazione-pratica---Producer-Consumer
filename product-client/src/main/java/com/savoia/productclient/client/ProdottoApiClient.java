@@ -6,6 +6,7 @@ import com.savoia.productclient.exception.ApiErroreException;
 import com.savoia.productclient.exception.ApiNonDisponibileException;
 import com.savoia.productclient.exception.ProdottoNonTrovatoException;
 import com.savoia.productclient.model.CriteriRicerca;
+import com.savoia.productclient.model.PriceSort;
 import com.savoia.productclient.model.ProdottoDTO;
 import com.savoia.productclient.model.RispostaApi;
 import org.springframework.cache.annotation.Cacheable;
@@ -17,6 +18,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Supplier;
@@ -46,15 +48,26 @@ public class ProdottoApiClient {
     /**
      * Traduce i criteri negli endpoint della Producer, che non combinano i filtri:
      * <ul>
-     *   <li>nessun filtro: {@code GET /products}</li>
+     *   <li>nessun filtro: {@code GET /products}, oppure {@code GET /products/sort?direction=...}
+     *       se è richiesto solo l'ordinamento per prezzo</li>
      *   <li>solo nome: {@code GET /products/search?name=...}</li>
      *   <li>categoria (con o senza nome): {@code GET /products/category/{categoria}};
      *       il nome, se presente, viene applicato qui con lo stesso criterio della Producer
      *       (il nome contiene il testo, senza distinzione tra maiuscole e minuscole)</li>
      * </ul>
+     * Con filtri e ordinamento insieme, l'ordinamento per prezzo viene applicato qui.
      */
     @Cacheable(CacheConfig.CACHE_PRODOTTI)
     public List<ProdottoDTO> trovaTutti(CriteriRicerca criteri) {
+        boolean hasFilters = criteri.nome() != null || criteri.categoria() != null;
+        if (!hasFilters && criteri.priceSort() != null) {
+            return findSortedByPrice(criteri.priceSort());
+        }
+        List<ProdottoDTO> prodotti = filtra(criteri);
+        return criteri.priceSort() == null ? prodotti : sortByPrice(prodotti, criteri.priceSort());
+    }
+
+    private List<ProdottoDTO> filtra(CriteriRicerca criteri) {
         if (criteri.categoria() != null) {
             List<ProdottoDTO> perCategoria = lista("/products/category/{categoria}", criteri.categoria());
             if (criteri.nome() == null) {
@@ -71,6 +84,21 @@ public class ProdottoApiClient {
                     .body(LISTA_PRODOTTI)));
         }
         return lista("/products");
+    }
+
+    private List<ProdottoDTO> findSortedByPrice(PriceSort priceSort) {
+        return dati(esegui(() -> restClient.get()
+                .uri(uri -> uri.path("/products/sort").queryParam("direction", priceSort.name()).build())
+                .retrieve()
+                .body(LISTA_PRODOTTI)));
+    }
+
+    private static List<ProdottoDTO> sortByPrice(List<ProdottoDTO> prodotti, PriceSort priceSort) {
+        Comparator<ProdottoDTO> byPrice = Comparator.comparing(
+                ProdottoDTO::prezzo, Comparator.nullsLast(Comparator.naturalOrder()));
+        return prodotti.stream()
+                .sorted(priceSort == PriceSort.ASC ? byPrice : byPrice.reversed())
+                .toList();
     }
 
     /** {@code GET /products/{id}}. */
