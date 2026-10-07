@@ -45,6 +45,6 @@ public class ProdottoService {
     }
 
     public void deleteProduct(Long id) {
-        throw new UnsupportedOperationException();
+        prodottoApiClient.deleteProduct(id);
     }
 }

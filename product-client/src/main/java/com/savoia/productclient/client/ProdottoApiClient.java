@@ -133,8 +133,14 @@ public class ProdottoApiClient {
                 .body(PRODOTTO)));
     }
 
+    /** {@code DELETE /products/{id}}, autenticata con le credenziali di servizio della Producer. */
+    @CacheEvict(cacheNames = {CacheConfig.CACHE_PRODOTTI, CacheConfig.CACHE_PRODOTTO}, allEntries = true)
     public void deleteProduct(Long id) {
-        throw new UnsupportedOperationException();
+        esegui(() -> restClient.delete()
+                .uri("/products/{id}", id)
+                .headers(this::authenticate)
+                .retrieve()
+                .toBodilessEntity());
     }
 
     private void authenticate(HttpHeaders headers) {

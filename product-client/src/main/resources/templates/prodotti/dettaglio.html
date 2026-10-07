@@ -15,7 +15,13 @@
     <article class="scheda">
         <div class="intestazione">
             <h1 th:text="${prodotto.nome}">Laptop Pro 15</h1>
-            <a class="button" th:href="@{/prodotti/{id}/modifica(id=${prodotto.id})}">Modifica</a>
+            <div class="azioni">
+                <a class="button" th:href="@{/prodotti/{id}/modifica(id=${prodotto.id})}">Modifica</a>
+                <form th:action="@{/prodotti/{id}/elimina(id=${prodotto.id})}" method="post"
+                      onsubmit="return confirm('Eliminare questo prodotto?');">
+                    <button class="button button-pericolo" type="submit">Elimina</button>
+                </form>
+            </div>
         </div>
 
         <dl>
