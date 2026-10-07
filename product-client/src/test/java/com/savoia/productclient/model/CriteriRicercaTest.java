@@ -39,4 +39,14 @@ class CriteriRicercaTest {
         assertThat(new CriteriRicerca(" laptop", null))
                 .isEqualTo(new CriteriRicerca("laptop", ""));
     }
+
+    @Test
+    void criteriaWithoutPriceSortAreUnsorted() {
+        assertThat(new CriteriRicerca("laptop", null).priceSort()).isNull();
+    }
+
+    @Test
+    void priceSortAloneMakesTheCriteriaNotEmpty() {
+        assertThat(new CriteriRicerca(null, null, PriceSort.DESC).isVuoto()).isFalse();
+    }
 }

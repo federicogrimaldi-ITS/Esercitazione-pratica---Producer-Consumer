@@ -23,6 +23,14 @@
                         th:selected="${c.codice == criteri.categoria}">Informatica</option>
             </select>
         </label>
+        <label>
+            Ordina
+            <select name="priceSort">
+                <option value="" th:selected="${criteri.priceSort == null}">Nessun ordinamento</option>
+                <option value="ASC" th:selected="${criteri.priceSort?.name() == 'ASC'}">Prezzo crescente</option>
+                <option value="DESC" th:selected="${criteri.priceSort?.name() == 'DESC'}">Prezzo decrescente</option>
+            </select>
+        </label>
         <button class="button" type="submit">Cerca</button>
         <a th:unless="${criteri.vuoto}" th:href="@{/prodotti}">Azzera filtri</a>
     </form>

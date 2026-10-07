@@ -4,6 +4,7 @@ import com.savoia.productclient.exception.ApiNonDisponibileException;
 import com.savoia.productclient.exception.ProdottoNonTrovatoException;
 import com.savoia.productclient.model.Categoria;
 import com.savoia.productclient.model.CriteriRicerca;
+import com.savoia.productclient.model.PriceSort;
 import com.savoia.productclient.model.ProdottoDTO;
 import com.savoia.productclient.service.ProdottoService;
 import org.junit.jupiter.api.Test;
@@ -129,5 +130,16 @@ class ProdottoWebControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Laptop Pro 15")))
                 .andExpect(content().string(containsString("<option value=\"\" selected=\"selected\">Tutte</option>")));
+    }
+
+    @Test
+    void priceSortIsForwardedAndKeptSelectedInTheForm() throws Exception {
+        when(prodottoService.cercaProdotti(new CriteriRicerca(null, null, PriceSort.DESC))).thenReturn(List.of(LAPTOP));
+
+        mvc.perform(get("/prodotti").param("priceSort", "DESC"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Laptop Pro 15")))
+                .andExpect(content().string(containsString("<option value=\"DESC\" selected=\"selected\">Prezzo decrescente</option>")))
+                .andExpect(content().string(containsString("<option value=\"ASC\">Prezzo crescente</option>")));
     }
 }

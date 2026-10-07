@@ -5,6 +5,7 @@ import com.savoia.productclient.exception.ApiErroreException;
 import com.savoia.productclient.exception.ApiNonDisponibileException;
 import com.savoia.productclient.exception.ProdottoNonTrovatoException;
 import com.savoia.productclient.model.CriteriRicerca;
+import com.savoia.productclient.model.PriceSort;
 import com.savoia.productclient.model.ProdottoDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,6 +114,34 @@ class ProdottoApiClientTest {
         List<ProdottoDTO> prodotti = client.trovaTutti(new CriteriRicerca("monitor", "Informatica"));
 
         assertThat(prodotti).extracting(ProdottoDTO::id).containsExactly(3L);
+        server.verify();
+    }
+
+    @Test
+    void priceSortWithoutFiltersUsesTheSortEndpoint() {
+        server.expect(requestTo("http://producer.test/api/products/sort?direction=DESC"))
+                .andRespond(withSuccess(risposta("[" + PRODOTTO_JSON + "]"), MediaType.APPLICATION_JSON));
+
+        List<ProdottoDTO> prodotti = client.trovaTutti(new CriteriRicerca(null, null, PriceSort.DESC));
+
+        assertThat(prodotti).hasSize(1);
+        server.verify();
+    }
+
+    @Test
+    void priceSortWithFiltersSortsTheFilteredProductsByPrice() {
+        server.expect(requestTo("http://producer.test/api/products/category/Informatica"))
+                .andRespond(withSuccess(risposta("""
+                        [
+                          {"id": 1, "name": "Laptop Pro 15", "price": 1299.90, "category": "Informatica", "quantity": 15},
+                          {"id": 3, "name": "Monitor 27 4K", "price": 449.90, "category": "Informatica", "quantity": 12},
+                          {"id": 2, "name": "Laptop Air 13", "price": 899.00, "category": "Informatica", "quantity": 22}
+                        ]
+                        """), MediaType.APPLICATION_JSON));
+
+        List<ProdottoDTO> prodotti = client.trovaTutti(new CriteriRicerca(null, "Informatica", PriceSort.ASC));
+
+        assertThat(prodotti).extracting(ProdottoDTO::id).containsExactly(3L, 2L, 1L);
         server.verify();
     }
 
