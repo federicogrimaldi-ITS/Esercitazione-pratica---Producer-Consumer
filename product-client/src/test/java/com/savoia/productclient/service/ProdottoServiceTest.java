@@ -19,7 +19,7 @@ class ProdottoServiceTest {
 
     ProdottoApiClient client = mock(ProdottoApiClient.class);
     ApiProperties apiProperties = new ApiProperties(
-            "http://producer.test/api", List.of("Accessori", "Audio", "Informatica"));
+            "http://producer.test/api", List.of("Accessori", "Audio", "Informatica"), "admin", "secret");
     ProdottoService service = new ProdottoService(client, apiProperties);
 
     @Test

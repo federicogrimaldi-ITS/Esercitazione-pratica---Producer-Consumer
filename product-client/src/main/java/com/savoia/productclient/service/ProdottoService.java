@@ -5,6 +5,7 @@ import com.savoia.productclient.config.ApiProperties;
 import com.savoia.productclient.model.Categoria;
 import com.savoia.productclient.model.CriteriRicerca;
 import com.savoia.productclient.model.ProdottoDTO;
+import com.savoia.productclient.model.ProductForm;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,5 +34,9 @@ public class ProdottoService {
 
     public List<Categoria> categorie() {
         return categories;
+    }
+
+    public ProdottoDTO createProduct(ProductForm productForm) {
+        throw new UnsupportedOperationException();
     }
 }

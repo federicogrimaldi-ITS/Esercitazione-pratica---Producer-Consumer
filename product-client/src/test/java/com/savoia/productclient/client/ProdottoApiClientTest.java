@@ -1,11 +1,14 @@
 package com.savoia.productclient.client;
 
 import com.savoia.productclient.config.ApiProperties;
+import com.savoia.productclient.exception.ApiAuthenticationException;
 import com.savoia.productclient.exception.ApiErroreException;
+import com.savoia.productclient.exception.InvalidProductException;
 import com.savoia.productclient.exception.ApiNonDisponibileException;
 import com.savoia.productclient.exception.ProdottoNonTrovatoException;
 import com.savoia.productclient.model.CriteriRicerca;
 import com.savoia.productclient.model.PriceSort;
+import com.savoia.productclient.model.ProductForm;
 import com.savoia.productclient.model.ProdottoDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +27,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withException;
@@ -31,9 +37,13 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
 
 @RestClientTest(ProdottoApiClient.class)
-@TestPropertySource(properties = "api.base-url=http://producer.test/api")
+@TestPropertySource(properties = {
+        "api.base-url=http://producer.test/api",
+        "api.username=admin",
+        "api.password=secret"})
 class ProdottoApiClientTest {
 
     /** Prodotto come lo serializza la Producer (entity Prodotto, campi in inglese, categoria enum). */
@@ -198,5 +208,73 @@ class ProdottoApiClientTest {
 
         assertThatThrownBy(() -> client.trovaTutti(CriteriRicerca.nessuno()))
                 .isInstanceOf(ApiNonDisponibileException.class);
+    }
+
+    static final String BASIC_ADMIN_SECRET = "Basic YWRtaW46c2VjcmV0";
+
+    static ProductForm notebookGaming() {
+        return new ProductForm("Notebook Gaming", "Notebook ad alte prestazioni",
+                new BigDecimal("1599.90"), "Informatica", 8);
+    }
+
+    @Test
+    void createProductSendsAnAuthenticatedPostWithTheProductAsJson() {
+        server.expect(requestTo("http://producer.test/api/products"))
+                .andExpect(method(POST))
+                .andExpect(header("Authorization", BASIC_ADMIN_SECRET))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.name").value("Notebook Gaming"))
+                .andExpect(jsonPath("$.price").value(1599.90))
+                .andExpect(jsonPath("$.category").value("Informatica"))
+                .andExpect(jsonPath("$.quantity").value(8))
+                .andRespond(withStatus(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
+                        .body(risposta(PRODOTTO_JSON)));
+
+        ProdottoDTO created = client.createProduct(notebookGaming());
+
+        assertThat(created.id()).isEqualTo(1L);
+        server.verify();
+    }
+
+    @Test
+    void readRequestsAreSentWithoutCredentials() {
+        server.expect(requestTo("http://producer.test/api/products"))
+                .andExpect(request -> assertThat(request.getHeaders().containsHeader("Authorization")).isFalse())
+                .andRespond(withSuccess(risposta("[]"), MediaType.APPLICATION_JSON));
+
+        client.trovaTutti(CriteriRicerca.nessuno());
+
+        server.verify();
+    }
+
+    @Test
+    void validationErrorsFromTheProducerBecomeFieldErrors() {
+        server.expect(requestTo("http://producer.test/api/products"))
+                .andRespond(withStatus(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("""
+                        {
+                            "data": null,
+                            "error": "Bad Request",
+                            "errors": {"name": "Name is required", "price": "Price cannot be negative"},
+                            "httpStatus": "400 BAD_REQUEST",
+                            "message": "Some fields are invalid.",
+                            "timestamp": "2026-10-07T10:00:00"
+                        }
+                        """));
+
+        assertThatThrownBy(() -> client.createProduct(notebookGaming()))
+                .isInstanceOfSatisfying(InvalidProductException.class, e -> {
+                    assertThat(e.getMessage()).isEqualTo("Some fields are invalid.");
+                    assertThat(e.getFieldErrors()).containsEntry("name", "Name is required")
+                            .containsEntry("price", "Price cannot be negative");
+                });
+    }
+
+    @Test
+    void rejectedCredentialsBecomeApiAuthenticationException() {
+        server.expect(requestTo("http://producer.test/api/products"))
+                .andRespond(withStatus(HttpStatus.UNAUTHORIZED));
+
+        assertThatThrownBy(() -> client.createProduct(notebookGaming()))
+                .isInstanceOf(ApiAuthenticationException.class);
     }
 }

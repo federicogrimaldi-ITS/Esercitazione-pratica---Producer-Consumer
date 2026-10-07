@@ -7,6 +7,7 @@ import com.savoia.productclient.exception.ApiNonDisponibileException;
 import com.savoia.productclient.exception.ProdottoNonTrovatoException;
 import com.savoia.productclient.model.CriteriRicerca;
 import com.savoia.productclient.model.PriceSort;
+import com.savoia.productclient.model.ProductForm;
 import com.savoia.productclient.model.ProdottoDTO;
 import com.savoia.productclient.model.RispostaApi;
 import org.springframework.cache.annotation.Cacheable;
@@ -99,6 +100,10 @@ public class ProdottoApiClient {
         return prodotti.stream()
                 .sorted(priceSort == PriceSort.ASC ? byPrice : byPrice.reversed())
                 .toList();
+    }
+
+    public ProdottoDTO createProduct(ProductForm productForm) {
+        throw new UnsupportedOperationException();
     }
 
     /** {@code GET /products/{id}}. */
