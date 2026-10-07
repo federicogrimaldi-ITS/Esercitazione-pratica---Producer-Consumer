@@ -20,6 +20,7 @@ import java.util.Map;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -150,5 +151,25 @@ class ProductFormControllerTest {
                 .andExpect(content().string(containsString("Modifica prodotto")))
                 .andExpect(content().string(containsString("action=\"/prodotti/1\"")))
                 .andExpect(content().string(containsString("Price cannot be negative")));
+    }
+
+    @Test
+    void deletingAProductRedirectsToTheListWithAMessage() throws Exception {
+        mvc.perform(post("/prodotti/20/elimina"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/prodotti"))
+                .andExpect(flash().attribute("successMessage", "Prodotto eliminato."));
+
+        verify(prodottoService).deleteProduct(20L);
+    }
+
+    @Test
+    void deletingAMissingProductShowsNotFound() throws Exception {
+        doThrow(new ProdottoNonTrovatoException("Product not found with Id: 9999"))
+                .when(prodottoService).deleteProduct(9999L);
+
+        mvc.perform(post("/prodotti/9999/elimina"))
+                .andExpect(status().isNotFound())
+                .andExpect(view().name("errore"));
     }
 }

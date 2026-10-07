@@ -39,6 +39,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpMethod.PUT;
+import static org.springframework.http.HttpMethod.DELETE;
 
 @RestClientTest(ProdottoApiClient.class)
 @TestPropertySource(properties = {
@@ -291,5 +292,30 @@ class ProdottoApiClientTest {
 
         assertThat(updated.id()).isEqualTo(1L);
         server.verify();
+    }
+
+    @Test
+    void deleteProductSendsAnAuthenticatedDelete() {
+        server.expect(requestTo("http://producer.test/api/products/20"))
+                .andExpect(method(DELETE))
+                .andExpect(header("Authorization", BASIC_ADMIN_SECRET))
+                .andRespond(withStatus(HttpStatus.NO_CONTENT));
+
+        client.deleteProduct(20L);
+
+        server.verify();
+    }
+
+    @Test
+    void deletingAMissingProductBecomesProdottoNonTrovato() {
+        server.expect(requestTo("http://producer.test/api/products/9999"))
+                .andRespond(withStatus(HttpStatus.NOT_FOUND).contentType(MediaType.APPLICATION_JSON).body("""
+                        {"data": null, "error": "Not Found", "httpStatus": "404 NOT_FOUND",
+                         "message": "Product not found with Id: 9999", "timestamp": "2026-10-07T10:00:00"}
+                        """));
+
+        assertThatThrownBy(() -> client.deleteProduct(9999L))
+                .isInstanceOf(ProdottoNonTrovatoException.class)
+                .hasMessage("Product not found with Id: 9999");
     }
 }
