@@ -62,7 +62,7 @@ class ProductFormControllerTest {
     @Test
     void validProductIsCreatedAndTheUserIsRedirectedToItsDetail() throws Exception {
         when(prodottoService.createProduct(NOTEBOOK)).thenReturn(
-                new ProdottoDTO(21L, "Notebook gaming", null, new BigDecimal("1599.90"), "Informatica", 8, null));
+                new ProdottoDTO(21L, "Notebook gaming", null, new BigDecimal("1599.90"), "Informatica", 8));
 
         mvc.perform(post("/prodotti")
                         .param("name", "Notebook Gaming")
@@ -101,7 +101,7 @@ class ProductFormControllerTest {
     }
 
     static final ProdottoDTO LAPTOP = new ProdottoDTO(1L, "Laptop Pro 15", "Notebook professionale",
-            new BigDecimal("1299.90"), "Informatica", 15, null);
+            new BigDecimal("1299.90"), "Informatica", 15);
 
     @Test
     void editPageShowsTheFormFilledWithTheCurrentProduct() throws Exception {

@@ -33,9 +33,6 @@
 
             <dt>Quantità disponibile</dt>
             <dd th:text="${prodotto.quantita}">15</dd>
-
-            <dt>Data di creazione</dt>
-            <dd th:text="${prodotto.dataCreazione != null} ? ${#temporals.format(prodotto.dataCreazione, 'dd/MM/yyyy HH:mm')} : '-'">01/09/2026 09:00</dd>
         </dl>
 
         <h2>Descrizione</h2>

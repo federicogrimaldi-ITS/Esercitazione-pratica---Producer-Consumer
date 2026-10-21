@@ -10,14 +10,14 @@ class ProdottoDTOTest {
 
     @Test
     void categoriaLeggibileTrasformaIlCodiceEnum() {
-        ProdottoDTO prodotto = new ProdottoDTO(1L, "Mouse", null, BigDecimal.TEN, "Accessori", 1, null);
+        ProdottoDTO prodotto = new ProdottoDTO(1L, "Mouse", null, BigDecimal.TEN, "Accessori", 1);
 
         assertThat(prodotto.categoriaLeggibile()).isEqualTo("Accessori");
     }
 
     @Test
     void categoriaAssenteRestaVuota() {
-        ProdottoDTO prodotto = new ProdottoDTO(1L, "Mouse", null, BigDecimal.TEN, null, 1, null);
+        ProdottoDTO prodotto = new ProdottoDTO(1L, "Mouse", null, BigDecimal.TEN, null, 1);
 
         assertThat(prodotto.categoriaLeggibile()).isEmpty();
     }

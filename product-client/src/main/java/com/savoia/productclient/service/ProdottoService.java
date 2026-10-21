@@ -6,6 +6,7 @@ import com.savoia.productclient.model.Categoria;
 import com.savoia.productclient.model.CriteriRicerca;
 import com.savoia.productclient.model.ProdottoDTO;
 import com.savoia.productclient.model.ProductForm;
+import com.savoia.productclient.model.ProductSummary;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,7 +25,7 @@ public class ProdottoService {
         this.categories = apiProperties.categories().stream().map(Categoria::new).toList();
     }
 
-    public List<ProdottoDTO> cercaProdotti(CriteriRicerca criteri) {
+    public List<ProductSummary> cercaProdotti(CriteriRicerca criteri) {
         return prodottoApiClient.trovaTutti(criteri);
     }
 
