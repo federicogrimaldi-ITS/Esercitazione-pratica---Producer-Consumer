@@ -51,3 +51,4 @@ services:
 
 volumes:
   mysql-data:
+    name: esercitazione-mysql-data
