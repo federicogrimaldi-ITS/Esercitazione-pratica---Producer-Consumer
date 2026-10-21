@@ -61,6 +61,8 @@ class ProdottoWebControllerTest {
                 .andExpect(content().string(containsString("<td>Informatica</td>")))
                 .andExpect(content().string(containsString("€ 1.299,90")))
                 .andExpect(content().string(containsString("href=\"/prodotti/1\"")))
+                .andExpect(content().string(not(containsString("<th>ID</th>"))))
+                .andExpect(content().string(not(containsString("<td>1</td>"))))
                 .andExpect(content().string(not(containsString("Quantità"))));
     }
 

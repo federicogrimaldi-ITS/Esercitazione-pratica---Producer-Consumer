@@ -46,7 +46,6 @@
         <table>
             <thead>
             <tr>
-                <th>ID</th>
                 <th>Nome</th>
                 <th>Categoria</th>
                 <th class="numero">Prezzo</th>
@@ -54,7 +53,6 @@
             </thead>
             <tbody>
             <tr th:each="p : ${prodotti}">
-                <td th:text="${p.id}">1</td>
                 <td><a th:href="@{/prodotti/{id}(id=${p.id})}" th:text="${p.name}">Laptop Pro 15</a></td>
                 <td th:text="${p.categoryLabel}">Informatica</td>
                 <td class="numero"
