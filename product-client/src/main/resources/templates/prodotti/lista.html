@@ -50,17 +50,15 @@
                 <th>Nome</th>
                 <th>Categoria</th>
                 <th class="numero">Prezzo</th>
-                <th class="numero">Quantità</th>
             </tr>
             </thead>
             <tbody>
             <tr th:each="p : ${prodotti}">
                 <td th:text="${p.id}">1</td>
-                <td><a th:href="@{/prodotti/{id}(id=${p.id})}" th:text="${p.nome}">Laptop Pro 15</a></td>
-                <td th:text="${p.categoriaLeggibile}">Informatica</td>
+                <td><a th:href="@{/prodotti/{id}(id=${p.id})}" th:text="${p.name}">Laptop Pro 15</a></td>
+                <td th:text="${p.categoryLabel}">Informatica</td>
                 <td class="numero"
-                    th:text="|€ ${#numbers.formatDecimal(p.prezzo, 1, 'POINT', 2, 'COMMA')}|">€ 1.299,90</td>
-                <td class="numero" th:text="${p.quantita}">15</td>
+                    th:text="|€ ${#numbers.formatDecimal(p.price, 1, 'POINT', 2, 'COMMA')}|">€ 1.299,90</td>
             </tr>
             </tbody>
         </table>
