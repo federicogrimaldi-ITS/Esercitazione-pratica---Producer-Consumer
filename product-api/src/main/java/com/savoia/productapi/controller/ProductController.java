@@ -1,8 +1,8 @@
 package com.savoia.productapi.controller;
 
-import com.savoia.productapi.entity.Product;
 import com.savoia.productapi.enums.Category;
 import com.savoia.productapi.payload.request.ProductRequest;
+import com.savoia.productapi.payload.response.ProductResponseDetails;
 import com.savoia.productapi.payload.response.ResponseApi;
 import com.savoia.productapi.service.ProductService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -37,7 +37,7 @@ public class ProductController {
     @PostMapping
     @SecurityRequirement(name = "basicAuth")
     public ResponseEntity<?> createProduct(@Valid @RequestBody ProductRequest productRequest) {
-        Product product = productService.createProduct(productRequest);
+        ProductResponseDetails product = productService.createProduct(productRequest);
         return ResponseApi.buildResponse(
                 HttpStatus.CREATED,
                 product,
@@ -60,7 +60,7 @@ public class ProductController {
     public ResponseEntity<?> updateProduct(
             @PathVariable("id") @Positive(message = "The ID must be positive") Long id,
             @Valid @RequestBody ProductRequest productRequest) {
-        Product product = productService.updateProduct(id, productRequest);
+        ProductResponseDetails product = productService.updateProduct(id, productRequest);
         return ResponseApi.buildResponse(
                 HttpStatus.OK,
                 product,
