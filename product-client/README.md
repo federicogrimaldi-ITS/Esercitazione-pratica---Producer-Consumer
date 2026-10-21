@@ -92,14 +92,15 @@ server:
       tracking-modes: cookie  # niente ;jsessionid negli URL dei redirect
 
 api:
-  base-url: http://localhost:8081/api   # indirizzo della Producer API
+  base-url: ${API_BASE_URL:http://localhost:8081/api}   # indirizzo della Producer API
   categories: Accessori,Audio,Informatica,Mobile,Networking,Storage,Ufficio,Wearable
   username: ${API_USERNAME:}            # credenziali HTTP Basic della Producer
   password: ${API_PASSWORD:}
 ```
 
-- L'indirizzo della Producer non è scritto nel codice Java: si può cambiare anche all'avvio,
-  ad esempio `--api.base-url=http://altro-host:8081/api`.
+- L'indirizzo della Producer non è scritto nel codice Java: si può cambiare con la variabile
+  d'ambiente `API_BASE_URL` (usata da Docker Compose) oppure all'avvio, ad esempio
+  `--api.base-url=http://altro-host:8081/api`.
 - `api.categories` riproduce i valori dell'enum `Category` della Producer, che non espone
   un endpoint per elencarli; serve al filtro di ricerca e al form del prodotto.
 - Le credenziali sono lette dalle stesse variabili d'ambiente usate dalla Producer e vengono
@@ -107,6 +108,18 @@ api:
   creare, modificare o eliminare mostra la pagina "Operazione non autorizzata".
 
 ## Avvio
+
+### Con Docker Compose
+
+Dalla cartella principale del progetto si avviano insieme MySQL, Producer e Consumer
+(vedere il [README principale](../README.md)):
+
+```bash
+cp .env.example .env   # poi sostituire le password
+docker compose up --build
+```
+
+### In locale
 
 1. Avviare MySQL e la Producer (`product-api`) sulla porta 8081.
 2. Avviare il Consumer con le stesse credenziali della Producer:
