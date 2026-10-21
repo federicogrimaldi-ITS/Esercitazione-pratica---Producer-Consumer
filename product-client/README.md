@@ -19,9 +19,9 @@ Browser → Consumer (:8082) → HTTP/REST → Producer (:8081) → Service → 
 
 Il Consumer offre:
 
-- `/prodotti` – tabella dei prodotti (ID, nome, categoria, prezzo, quantità);
+- `/prodotti` – tabella dei prodotti (ID, nome, categoria, prezzo);
 - ricerca per **nome** e/o **categoria** e **ordinamento per prezzo** dalla stessa pagina;
-- `/prodotti/{id}` – pagina di dettaglio del prodotto;
+- `/prodotti/{id}` – pagina di dettaglio del prodotto (con descrizione e quantità);
 - **creazione, modifica ed eliminazione** dei prodotti, con gli errori di validazione della
   Producer mostrati sotto i campi del form;
 - gestione degli errori della REST API (prodotto inesistente, credenziali rifiutate, errori
@@ -200,7 +200,9 @@ Elenco delle REST API della Producer (vedere README di `product-api`):
 ### Formato delle risposte della Producer
 
 Tutte le risposte (corrette ed errori) sono avvolte nella busta `ResponseApi`
-(record `RispostaApi<T>` nel Consumer). Il prodotto o la lista si trovano in `data`:
+(record `RispostaApi<T>` nel Consumer). Il prodotto o la lista si trovano in `data`.
+
+Dettaglio, creazione e modifica restituiscono `ProductResponseDetails`:
 
 ```json
 {
@@ -210,9 +212,23 @@ Tutte le risposte (corrette ed errori) sono avvolte nella busta `ResponseApi`
     "description": "Notebook professionale...",
     "price": 1299.90,
     "category": "Informatica",
-    "quantity": 15,
-    "creationDate": "2026-09-01T09:00:00"
+    "quantity": 15
   },
+  "error": null,
+  "httpStatus": "200 OK",
+  "message": null,
+  "timestamp": "2026-10-07T10:00:00"
+}
+```
+
+Le liste (`/products`, `/search`, `/category/{category}`, `/sort`) restituiscono
+`ProductResponse`, con i soli campi mostrati nella tabella:
+
+```json
+{
+  "data": [
+    { "id": 1, "name": "Laptop Pro 15", "price": 1299.90, "category": "Informatica" }
+  ],
   "error": null,
   "httpStatus": "200 OK",
   "message": null,
@@ -258,7 +274,7 @@ da `WebExceptionHandler` (`@ControllerAdvice`) con la pagina `errore.html`, oppu
 src/main/java/com/savoia/productclient
 ├── ProductClientApplication.java
 ├── config       ApiProperties (api.*), CacheConfig
-├── model        ProdottoDTO, Categoria, CriteriRicerca, PriceSort, ProductForm, RispostaApi
+├── model        ProductSummary, ProdottoDTO, Categoria, CriteriRicerca, PriceSort, ProductForm, RispostaApi
 ├── client       ProdottoApiClient (RestClient)
 ├── exception    eccezioni applicative + WebExceptionHandler
 ├── service      ProdottoService
@@ -270,9 +286,10 @@ src/main/resources
 ```
 
 Separazione dei modelli: l'Entity JPA e i DTO dell'API restano nella Producer; il Consumer
-usa un proprio modello client (`ProdottoDTO`, record immutabile con `BigDecimal` per il
-prezzo e `LocalDateTime` per la data), mappato sui campi JSON inglesi della Producer tramite
-`@JsonProperty`. `ProductForm` è sia il modello del form sia il corpo JSON inviato nelle
+usa un proprio modello client che rispecchia i due DTO di risposta della Producer:
+`ProductSummary` per le liste (`ProductResponse`) e `ProdottoDTO` per il dettaglio
+(`ProductResponseDetails`, mappato sui campi JSON inglesi tramite `@JsonProperty`), entrambi
+record immutabili con `BigDecimal` per il prezzo. `ProductForm` è sia il modello del form sia il corpo JSON inviato nelle
 chiamate di creazione e modifica.
 
 Le scelte architetturali significative sono registrate in [`docs/decisions.md`](../docs/decisions.md).
@@ -287,4 +304,4 @@ Le scelte architetturali significative sono registrate in [`docs/decisions.md`](
   credenziali di servizio configurate tramite variabili d'ambiente.
 - **Timeout configurabili** verso la Producer, così una Producer lenta produce il messaggio
   di servizio non disponibile invece di bloccare la pagina.
-- **Test automatici** (66 test) su client HTTP, gestione errori, pagine web, form e cache.
+- **Test automatici** (68 test) su client HTTP, gestione errori, pagine web, form e cache.
