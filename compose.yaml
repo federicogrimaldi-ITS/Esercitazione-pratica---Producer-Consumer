@@ -1,0 +1,50 @@
+name: esercitazione-api
+
+services:
+
+  db:
+    image: mysql:8.0
+    container_name: esercitazione-db
+    environment:
+      MYSQL_DATABASE: esercitazione_api
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  producer:
+    build: ./producer
+    image: producer-api:1.0
+    container_name: esercitazione-producer
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/esercitazione_api?allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_SECURITY_USER_NAME: ${API_USERNAME:?definire API_USERNAME nel file .env}
+      SPRING_SECURITY_USER_PASSWORD: ${API_PASSWORD:?definire API_PASSWORD nel file .env}
+    ports:
+      - "8081:8081"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  consumer:
+    build: ./consumer
+    image: consumer-web:1.0
+    container_name: esercitazione-consumer
+    environment:
+      PRODUCER_URL: http://producer:8081
+    ports:
+      - "8082:8082"
+    depends_on:
+      - producer
+
+volumes:
+  mysql-data:
