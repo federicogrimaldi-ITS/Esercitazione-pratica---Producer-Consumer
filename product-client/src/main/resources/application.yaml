@@ -21,7 +21,7 @@ server:
 
 # Indirizzo della Producer API (product-api)
 api:
-  base-url: http://localhost:8081/api
+  base-url: ${API_BASE_URL:http://localhost:8081/api}
   # Values of the Producer Category enum (the Producer has no endpoint listing them)
   categories: Accessori,Audio,Informatica,Mobile,Networking,Storage,Ufficio,Wearable
   # Producer HTTP Basic credentials, required to create, update and delete products
