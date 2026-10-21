@@ -5,6 +5,7 @@ import com.savoia.productclient.config.ApiProperties;
 import com.savoia.productclient.model.Categoria;
 import com.savoia.productclient.model.CriteriRicerca;
 import com.savoia.productclient.model.ProdottoDTO;
+import com.savoia.productclient.model.ProductSummary;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -25,8 +26,8 @@ class ProdottoServiceTest {
     @Test
     void cercaProdottiRestituisceIProdottiDellApi() {
         CriteriRicerca criteri = new CriteriRicerca("laptop", null);
-        List<ProdottoDTO> prodotti = List.of(
-                new ProdottoDTO(1L, "Laptop Pro 15", null, new BigDecimal("1299.90"), "Informatica", 15, null));
+        List<ProductSummary> prodotti = List.of(
+                new ProductSummary(1L, "Laptop Pro 15", new BigDecimal("1299.90"), "Informatica"));
         when(client.trovaTutti(criteri)).thenReturn(prodotti);
 
         assertThat(service.cercaProdotti(criteri)).isEqualTo(prodotti);
@@ -34,7 +35,7 @@ class ProdottoServiceTest {
 
     @Test
     void trovaProdottoRestituisceIlDettaglioDellApi() {
-        ProdottoDTO laptop = new ProdottoDTO(1L, "Laptop Pro 15", null, new BigDecimal("1299.90"), "Informatica", 15, null);
+        ProdottoDTO laptop = new ProdottoDTO(1L, "Laptop Pro 15", null, new BigDecimal("1299.90"), "Informatica", 15);
         when(client.trovaPerId(1L)).thenReturn(laptop);
 
         assertThat(service.trovaProdotto(1L)).isEqualTo(laptop);

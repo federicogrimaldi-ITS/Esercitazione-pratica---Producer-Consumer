@@ -11,7 +11,7 @@ class ProductFormTest {
     @Test
     void formIsFilledFromAnExistingProduct() {
         ProdottoDTO laptop = new ProdottoDTO(1L, "Laptop Pro 15", "Notebook", new BigDecimal("1299.90"),
-                "Informatica", 15, null);
+                "Informatica", 15);
 
         assertThat(ProductForm.from(laptop)).isEqualTo(
                 new ProductForm("Laptop Pro 15", "Notebook", new BigDecimal("1299.90"), "Informatica", 15));

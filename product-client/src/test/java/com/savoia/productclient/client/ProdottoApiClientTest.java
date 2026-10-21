@@ -9,6 +9,7 @@ import com.savoia.productclient.exception.ProdottoNonTrovatoException;
 import com.savoia.productclient.model.CriteriRicerca;
 import com.savoia.productclient.model.PriceSort;
 import com.savoia.productclient.model.ProductForm;
+import com.savoia.productclient.model.ProductSummary;
 import com.savoia.productclient.model.ProdottoDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,6 @@ import org.springframework.test.web.client.MockRestServiceServer;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,7 +48,7 @@ import static org.springframework.http.HttpMethod.DELETE;
         "api.password=secret"})
 class ProdottoApiClientTest {
 
-    /** Prodotto come lo serializza la Producer (entity Prodotto, campi in inglese, categoria enum). */
+    /** Product detail as the Producer serializes it (ProductResponseDetails). */
     static final String PRODOTTO_JSON = """
             {
                 "id": 1,
@@ -56,9 +56,13 @@ class ProdottoApiClientTest {
                 "description": "Notebook professionale",
                 "price": 1299.90,
                 "category": "Informatica",
-                "quantity": 15,
-                "creationDate": "2026-09-01T09:00:00"
+                "quantity": 15
             }
+            """;
+
+    /** Product list item as the Producer serializes it (ProductResponse). */
+    static final String PRODUCT_SUMMARY_JSON = """
+            {"id": 1, "name": "Laptop Pro 15", "price": 1299.90, "category": "Informatica"}
             """;
 
     /** Busta ResponseApi con cui la Producer restituisce ogni risposta corretta (il contenuto è in data). */
@@ -83,31 +87,31 @@ class ProdottoApiClientTest {
     void trovaTuttiSenzaFiltriChiamaLaListaCompleta() {
         server.expect(requestTo("http://producer.test/api/products"))
                 .andExpect(method(GET))
-                .andRespond(withSuccess(risposta("[" + PRODOTTO_JSON + "]"), MediaType.APPLICATION_JSON));
+                .andRespond(withSuccess(risposta("[" + PRODUCT_SUMMARY_JSON + "]"), MediaType.APPLICATION_JSON));
 
-        List<ProdottoDTO> prodotti = client.trovaTutti(CriteriRicerca.nessuno());
+        List<ProductSummary> prodotti = client.trovaTutti(CriteriRicerca.nessuno());
 
-        assertThat(prodotti).extracting(ProdottoDTO::nome).containsExactly("Laptop Pro 15");
+        assertThat(prodotti).extracting(ProductSummary::name).containsExactly("Laptop Pro 15");
         server.verify();
     }
 
     @Test
     void ricercaPerNomeUsaLEndpointSearch() {
         server.expect(requestTo("http://producer.test/api/products/search?name=laptop%20pro%2015"))
-                .andRespond(withSuccess(risposta("[" + PRODOTTO_JSON + "]"), MediaType.APPLICATION_JSON));
+                .andRespond(withSuccess(risposta("[" + PRODUCT_SUMMARY_JSON + "]"), MediaType.APPLICATION_JSON));
 
-        List<ProdottoDTO> prodotti = client.trovaTutti(new CriteriRicerca("laptop pro 15", null));
+        List<ProductSummary> prodotti = client.trovaTutti(new CriteriRicerca("laptop pro 15", null));
 
-        assertThat(prodotti).extracting(ProdottoDTO::nome).containsExactly("Laptop Pro 15");
+        assertThat(prodotti).extracting(ProductSummary::name).containsExactly("Laptop Pro 15");
         server.verify();
     }
 
     @Test
     void filtroPerCategoriaUsaLEndpointCategory() {
         server.expect(requestTo("http://producer.test/api/products/category/Informatica"))
-                .andRespond(withSuccess(risposta("[" + PRODOTTO_JSON + "]"), MediaType.APPLICATION_JSON));
+                .andRespond(withSuccess(risposta("[" + PRODUCT_SUMMARY_JSON + "]"), MediaType.APPLICATION_JSON));
 
-        List<ProdottoDTO> prodotti = client.trovaTutti(new CriteriRicerca(null, "Informatica"));
+        List<ProductSummary> prodotti = client.trovaTutti(new CriteriRicerca(null, "Informatica"));
 
         assertThat(prodotti).hasSize(1);
         server.verify();
@@ -118,23 +122,23 @@ class ProdottoApiClientTest {
         server.expect(requestTo("http://producer.test/api/products/category/Informatica"))
                 .andRespond(withSuccess(risposta("""
                         [
-                          {"id": 1, "name": "Laptop Pro 15", "price": 1299.90, "category": "Informatica", "quantity": 15},
-                          {"id": 3, "name": "Monitor 27 4K", "price": 449.90, "category": "Informatica", "quantity": 12}
+                          {"id": 1, "name": "Laptop Pro 15", "price": 1299.90, "category": "Informatica"},
+                          {"id": 3, "name": "Monitor 27 4K", "price": 449.90, "category": "Informatica"}
                         ]
                         """), MediaType.APPLICATION_JSON));
 
-        List<ProdottoDTO> prodotti = client.trovaTutti(new CriteriRicerca("monitor", "Informatica"));
+        List<ProductSummary> prodotti = client.trovaTutti(new CriteriRicerca("monitor", "Informatica"));
 
-        assertThat(prodotti).extracting(ProdottoDTO::id).containsExactly(3L);
+        assertThat(prodotti).extracting(ProductSummary::id).containsExactly(3L);
         server.verify();
     }
 
     @Test
     void priceSortWithoutFiltersUsesTheSortEndpoint() {
         server.expect(requestTo("http://producer.test/api/products/sort?direction=DESC"))
-                .andRespond(withSuccess(risposta("[" + PRODOTTO_JSON + "]"), MediaType.APPLICATION_JSON));
+                .andRespond(withSuccess(risposta("[" + PRODUCT_SUMMARY_JSON + "]"), MediaType.APPLICATION_JSON));
 
-        List<ProdottoDTO> prodotti = client.trovaTutti(new CriteriRicerca(null, null, PriceSort.DESC));
+        List<ProductSummary> prodotti = client.trovaTutti(new CriteriRicerca(null, null, PriceSort.DESC));
 
         assertThat(prodotti).hasSize(1);
         server.verify();
@@ -145,15 +149,15 @@ class ProdottoApiClientTest {
         server.expect(requestTo("http://producer.test/api/products/category/Informatica"))
                 .andRespond(withSuccess(risposta("""
                         [
-                          {"id": 1, "name": "Laptop Pro 15", "price": 1299.90, "category": "Informatica", "quantity": 15},
-                          {"id": 3, "name": "Monitor 27 4K", "price": 449.90, "category": "Informatica", "quantity": 12},
-                          {"id": 2, "name": "Laptop Air 13", "price": 899.00, "category": "Informatica", "quantity": 22}
+                          {"id": 1, "name": "Laptop Pro 15", "price": 1299.90, "category": "Informatica"},
+                          {"id": 3, "name": "Monitor 27 4K", "price": 449.90, "category": "Informatica"},
+                          {"id": 2, "name": "Laptop Air 13", "price": 899.00, "category": "Informatica"}
                         ]
                         """), MediaType.APPLICATION_JSON));
 
-        List<ProdottoDTO> prodotti = client.trovaTutti(new CriteriRicerca(null, "Informatica", PriceSort.ASC));
+        List<ProductSummary> prodotti = client.trovaTutti(new CriteriRicerca(null, "Informatica", PriceSort.ASC));
 
-        assertThat(prodotti).extracting(ProdottoDTO::id).containsExactly(3L, 2L, 1L);
+        assertThat(prodotti).extracting(ProductSummary::id).containsExactly(3L, 2L, 1L);
         server.verify();
     }
 
@@ -170,8 +174,7 @@ class ProdottoApiClientTest {
                 "Notebook professionale",
                 new BigDecimal("1299.90"),
                 "Informatica",
-                15,
-                LocalDateTime.of(2026, 9, 1, 9, 0)));
+                15));
     }
 
     @Test

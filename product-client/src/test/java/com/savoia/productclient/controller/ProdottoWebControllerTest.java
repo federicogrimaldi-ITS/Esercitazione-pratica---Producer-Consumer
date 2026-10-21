@@ -6,6 +6,7 @@ import com.savoia.productclient.model.Categoria;
 import com.savoia.productclient.model.CriteriRicerca;
 import com.savoia.productclient.model.PriceSort;
 import com.savoia.productclient.model.ProdottoDTO;
+import com.savoia.productclient.model.ProductSummary;
 import com.savoia.productclient.service.ProdottoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +15,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -30,7 +31,10 @@ class ProdottoWebControllerTest {
 
     static final ProdottoDTO LAPTOP = new ProdottoDTO(1L, "Laptop Pro 15",
             "Notebook professionale con processore Intel Core i7, 16 GB di RAM e SSD da 512 GB.",
-            new BigDecimal("1299.90"), "Informatica", 15, LocalDateTime.of(2026, 9, 1, 9, 0));
+            new BigDecimal("1299.90"), "Informatica", 15);
+
+    static final ProductSummary LAPTOP_SUMMARY = new ProductSummary(1L, "Laptop Pro 15",
+            new BigDecimal("1299.90"), "Informatica");
 
     @Autowired
     MockMvc mvc;
@@ -47,7 +51,7 @@ class ProdottoWebControllerTest {
 
     @Test
     void listaMostraIProdottiInTabellaConPrezzoFormattato() throws Exception {
-        when(prodottoService.cercaProdotti(CriteriRicerca.nessuno())).thenReturn(List.of(LAPTOP));
+        when(prodottoService.cercaProdotti(CriteriRicerca.nessuno())).thenReturn(List.of(LAPTOP_SUMMARY));
 
         mvc.perform(get("/prodotti"))
                 .andExpect(status().isOk())
@@ -55,8 +59,9 @@ class ProdottoWebControllerTest {
                 .andExpect(content().string(containsString("<table")))
                 .andExpect(content().string(containsString("Laptop Pro 15")))
                 .andExpect(content().string(containsString("<td>Informatica</td>")))
-                                .andExpect(content().string(containsString("€ 1.299,90")))
-                .andExpect(content().string(containsString("href=\"/prodotti/1\"")));
+                .andExpect(content().string(containsString("€ 1.299,90")))
+                .andExpect(content().string(containsString("href=\"/prodotti/1\"")))
+                .andExpect(content().string(not(containsString("Quantità"))));
     }
 
     @Test
@@ -90,7 +95,7 @@ class ProdottoWebControllerTest {
                 .andExpect(content().string(containsString("€ 1.299,90")))
                 .andExpect(content().string(containsString("15")))
                 .andExpect(content().string(containsString("Notebook professionale con processore Intel Core i7")))
-                .andExpect(content().string(containsString("01/09/2026 09:00")))
+                .andExpect(content().string(not(containsString("Data di creazione"))))
                 .andExpect(content().string(containsString("href=\"/prodotti/1/modifica\"")))
                 .andExpect(content().string(containsString("action=\"/prodotti/1/elimina\"")));
     }
@@ -113,7 +118,7 @@ class ProdottoWebControllerTest {
 
     @Test
     void ricercaInoltraNomeECategoriaEMantieneIValoriNelForm() throws Exception {
-        when(prodottoService.cercaProdotti(new CriteriRicerca("laptop", "Informatica"))).thenReturn(List.of(LAPTOP));
+        when(prodottoService.cercaProdotti(new CriteriRicerca("laptop", "Informatica"))).thenReturn(List.of(LAPTOP_SUMMARY));
         when(prodottoService.categorie()).thenReturn(List.of(new Categoria("Accessori"), new Categoria("Informatica")));
 
         mvc.perform(get("/prodotti").param("nome", "laptop").param("categoria", "Informatica"))
@@ -126,7 +131,7 @@ class ProdottoWebControllerTest {
 
     @Test
     void ricercaConCampiVuotiEquivaleAllaListaCompleta() throws Exception {
-        when(prodottoService.cercaProdotti(CriteriRicerca.nessuno())).thenReturn(List.of(LAPTOP));
+        when(prodottoService.cercaProdotti(CriteriRicerca.nessuno())).thenReturn(List.of(LAPTOP_SUMMARY));
 
         mvc.perform(get("/prodotti").param("nome", "").param("categoria", ""))
                 .andExpect(status().isOk())
@@ -136,7 +141,7 @@ class ProdottoWebControllerTest {
 
     @Test
     void priceSortIsForwardedAndKeptSelectedInTheForm() throws Exception {
-        when(prodottoService.cercaProdotti(new CriteriRicerca(null, null, PriceSort.DESC))).thenReturn(List.of(LAPTOP));
+        when(prodottoService.cercaProdotti(new CriteriRicerca(null, null, PriceSort.DESC))).thenReturn(List.of(LAPTOP_SUMMARY));
 
         mvc.perform(get("/prodotti").param("priceSort", "DESC"))
                 .andExpect(status().isOk())
