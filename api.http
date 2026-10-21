@@ -1,0 +1,77 @@
+@baseUrl = http://localhost:8081/api/prodotti
+# Credenziali: le stesse di API_USERNAME / API_PASSWORD nel file .env
+@user = admin
+@password = cambiami
+
+### Tutti i prodotti
+GET {{baseUrl}}
+
+### Dettaglio prodotto
+GET {{baseUrl}}/1
+
+### Prodotto inesistente (404)
+GET {{baseUrl}}/9999
+
+### Filtro per categoria
+GET {{baseUrl}}?categoria=Informatica
+
+### Ricerca per nome (case insensitive)
+GET {{baseUrl}}?nome=laptop
+
+### Ordinamento per prezzo crescente
+GET {{baseUrl}}?sort=prezzo
+
+### Ordinamento per prezzo decrescente
+GET {{baseUrl}}?sort=prezzo&direction=desc
+
+### Categoria + ordinamento
+GET {{baseUrl}}?categoria=Accessori&sort=prezzo&direction=asc
+
+### Nome + ordinamento
+GET {{baseUrl}}?nome=pro&sort=prezzo&direction=desc
+
+### Creazione prodotto (201)
+POST {{baseUrl}}
+Authorization: Basic {{user}} {{password}}
+Content-Type: application/json
+
+{
+  "nome": "Notebook Gaming",
+  "descrizione": "Notebook ad alte prestazioni",
+  "prezzo": 1599.90,
+  "categoria": "Informatica",
+  "quantita": 8
+}
+
+### Creazione con dati non validi (400)
+POST {{baseUrl}}
+Authorization: Basic {{user}} {{password}}
+Content-Type: application/json
+
+{
+  "nome": "",
+  "prezzo": -10,
+  "categoria": "",
+  "quantita": -1
+}
+
+### Aggiornamento prodotto (200)
+PUT {{baseUrl}}/5
+Authorization: Basic {{user}} {{password}}
+Content-Type: application/json
+
+{
+  "nome": "Mouse Wireless Pro X",
+  "descrizione": "Mouse wireless professionale",
+  "prezzo": 69.90,
+  "categoria": "Accessori",
+  "quantita": 42
+}
+
+### Eliminazione prodotto (204)
+DELETE {{baseUrl}}/20
+Authorization: Basic {{user}} {{password}}
+
+### Eliminazione prodotto inesistente (404)
+DELETE {{baseUrl}}/9999
+Authorization: Basic {{user}} {{password}}
